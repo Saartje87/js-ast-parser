@@ -18,7 +18,12 @@ Parser.prototype = {
 			// Matches " or '
 			if( this.is('"\'') ) {
 
-				token = this.readString();
+				token = this.parseString();
+			}
+
+			else if ( this.is('(') ) {
+
+				// parse group
 			}
 
 			// Add token
@@ -63,7 +68,7 @@ Parser.prototype = {
 	/**
 	 * Tokenize string
 	 */
-	readString: function () {
+	parseString: function () {
 
 		var value = '',
 			qoute = this.chr,
@@ -85,6 +90,11 @@ Parser.prototype = {
 				break;
 			}
 
+			if( escape ) {
+
+				// value += '\\';
+			}
+
 			value += this.chr;
 		}
 
@@ -98,7 +108,7 @@ Parser.prototype = {
 	/**
 	 *
 	 */
-	readNumber: function () {
+	parseNumber: function () {
 
 
 	},
@@ -107,7 +117,7 @@ Parser.prototype = {
 	 * may start with [$_A-Za-z]
 	 * mat contain [$_A-Za-z0-9]
 	 */
-	readIdentifier: function () {
+	parseIdentifier: function () {
 
 
 	},
