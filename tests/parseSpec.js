@@ -126,7 +126,7 @@ describe('Parser', function () {
 		});
 	});
 
-	it("should parse a statement", function () {
+	it("should parse an expression", function () {
 
 		// console.log(JSON.stringify(parse("12 + 34"), null, "\t"))
 
@@ -143,16 +143,16 @@ describe('Parser', function () {
 			}
 		});
 
-		expect(parse("12 || 34")).toEqual({
+		expect(parse("4 || 5")).toEqual({
 			"type": "LogicalExpression",
 			"operator": "||",
 			"left": {
 				"type": "Value",
-				"value": 12
+				"value": 4
 			},
 			"right": {
 				"type": "Value",
-				"value": 34
+				"value": 5
 			}
 		});
 	});
