@@ -258,7 +258,8 @@ Parser.prototype = {
 	parseVariable: function () {
 
 		var node,
-			chr;
+			chr,
+			args;
 
 		if( this.isIdentifierStart() ) {
 
@@ -283,8 +284,6 @@ Parser.prototype = {
 
 			else if ( chr === '[' ) {
 
-				// this.read();
-
 				node = {
 
 					type: "Object",
@@ -293,25 +292,29 @@ Parser.prototype = {
 				};
 			}
 
-			
+			else if ( chr === '(' ) {
+
+				args = this.parseArguments();
+
+				node = {
+
+					type: 'Callable',
+					callable: node
+				};
+
+				if( args ) {
+
+					node.args = args;
+				}
+			}
 		}
-
-		/*if( this.is('(') ) {
-
-			node = this.parseFunctionCall();
-		}*/
 
 		return node;
 	},
 
-	parseFunctionCall: function () {
+	parseArguments: function () {
 
-		return {
-
-			type: 'Callable',
-			value: '',
-			args: ''
-		}
+		return null;
 	}
 };
 

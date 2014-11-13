@@ -121,11 +121,16 @@ describe('Parser', function () {
 		});
 	});
 
-	// it("should parse a callable", function () {
+	it("should parse a callable", function () {
 
-	// 	expect(parse("foo()")).toEqual({
-	// 		type : "Callable",
-	// 		value : "foo()"
-	// 	});
-	// });
+		// console.log(JSON.stringify(parse("bar.foo()"), null, "\t"))
+
+		expect(parse("foo()")).toEqual({
+		    type: 'Callable',
+		    callable: {
+		        type: 'Identifier',
+		        value: 'foo'
+		    }
+		});
+	});
 });
