@@ -76,23 +76,35 @@ Parser.prototype = {
 
 		while ( this.read() ) {
 
-			escape = false;
-
 			if( this.chr === '\\' ) {
 
-				escape = true;
 				this.read();
+
+				// Escaped qoute
+				if( this.chr === qoute ) {
+						
+					value += qoute;
+					continue;
+				}
+
+				// \b \n \t \a\ r
+				if( this.is('bntar') ) {
+
+					value += '\\'+this.chr;
+					continue;
+				}
 			}
 
 			// End of string
-			if( this.chr === qoute && !escape ) {
-				
+			if( this.chr === qoute ) {
+
 				break;
 			}
 
-			if( escape ) {
+			if( this.chr === void 0 ) {
 
-				// value += '\\';
+				console.log(value);
+				throw Error('Parse error, unexpected end');
 			}
 
 			value += this.chr;
