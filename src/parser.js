@@ -77,14 +77,31 @@ Parser.prototype = {
 
 		var left = this.parseToken(),
 			operator = this.parseOperator(),
-			right;
+			right,
+			node;
 
 		if( !operator ) {
 
 			return left;
 		}
 
-		return left;
+		console.log('!?', this.chr, this.text);
+
+		right = this.parseToken();
+
+		return this.createBinaryExpression(operator.value, left, right);
+	},
+
+	createBinaryExpression: function ( operator, left, right ) {
+
+		var type = (operator === '||' || operator === '&&') ? 'LogicalExpression' : 'BinaryExpression';
+		
+		return {
+			type: type,
+			operator: operator,
+			left: left,
+			right: right
+		};
 	},
 
 	parseToken: function () {
@@ -109,40 +126,44 @@ Parser.prototype = {
 
 	parseOperator: function () {
 
-		var //operators = '+-!%^&|',
-			chr = this.chr,
+		var chr = this.chr,
 			two = this.chr+this.peek(),
 			three = two+this.peek(2),
-			i = 0,
-			j = 0;
+			match,
+			binaryOperators = this.binaryOperators,
+			i = 0, j = 0;
 
 		if( !this.chr ) {
 
 			return null;
 		}
 
-		for ( ; i <= 3; i++ ) {
+		if( binaryOperators.hasOwnProperty(three) ) {
 
-			if( this.binaryOperators.hasOwnProperty(chr) ) {
+			match = three;
+			this.skip(3);
+		} else if( binaryOperators.hasOwnProperty(two) ) {
 
-				for( ; j <= i; j++ ) {
+			match = two;
+			this.skip(2);
+		} else if( binaryOperators.hasOwnProperty(chr) ) {
 
-					this.read();
-				}
-
-				this.read(true);
-
-				return {
-
-					value: chr,
-					precedence: this.binaryOperators[chr]
-				};
-			}
-
-			chr += this.text[this.index];
+			match = chr;
+			this.skip(1);
 		}
 
-		return null;
+		this.read(true);
+
+		if( !match ) {
+
+			return null;
+		}
+
+		return {
+
+			value: match,
+			precedence: this.binaryOperators[match]
+		};
 	},
 
 	/**
@@ -175,6 +196,13 @@ Parser.prototype = {
 	peek: function ( i ) {
 
 		return this.text[this.index + (i || 1)] || '';
+	},
+
+	skip: function ( i ) {
+
+		this.index += i - 1;
+
+		return this.read();
 	},
 
 	/**

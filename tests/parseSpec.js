@@ -128,23 +128,33 @@ describe('Parser', function () {
 
 	it("should parse a statement", function () {
 
-		console.log(JSON.stringify(parse("12 + 34"), null, "\t"))
+		// console.log(JSON.stringify(parse("12 + 34"), null, "\t"))
 
-		// expect(parse("1 + 1")).toEqual({
-		//     type: 'Callable',
-		//     callable: {
-		//         type: 'Identifier',
-		//         value: 'foo'
-		//     }
-		// });
+		expect(parse("12 + 34")).toEqual({
+			"type": "BinaryExpression",
+			"operator": "+",
+			"left": {
+				"type": "Value",
+				"value": 12
+			},
+			"right": {
+				"type": "Value",
+				"value": 34
+			}
+		});
 
-		// expect(parse("foo('bar')")).toEqual({
-		//     type: 'Callable',
-		//     callable: {
-		//         type: 'Identifier',
-		//         value: 'foo'
-		//     }
-		// });
+		expect(parse("12 || 34")).toEqual({
+			"type": "LogicalExpression",
+			"operator": "||",
+			"left": {
+				"type": "Value",
+				"value": 12
+			},
+			"right": {
+				"type": "Value",
+				"value": 34
+			}
+		});
 	});
 
 	it("should parse a callable", function () {
