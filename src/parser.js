@@ -84,10 +84,12 @@ Parser.prototype = {
 			return this.parseString();
 		}
 
-		if( this.isIdentifierStart() ) {
+		if( this.is('(') ) {
 
-			return this.parseIdentifier();
+			return this.parseGroup();
 		}
+
+		return this.parseVariable();
 	},
 
 	parseBinaryOperator: function () {
@@ -112,6 +114,13 @@ Parser.prototype = {
 		this.chr = this.text[this.index];
 
 		return true;
+	},
+
+	/**
+	 *
+	 */
+	peek: function ( i ) {
+
 	},
 
 	/**
@@ -246,8 +255,63 @@ Parser.prototype = {
 		};
 	},
 
-	peek: function ( i ) {
+	parseVariable: function () {
 
+		var node,
+			chr;
+
+		if( this.isIdentifierStart() ) {
+
+			node = this.parseIdentifier();
+		}
+
+		while( this.chr && this.is('.[(') ) {
+
+			chr = this.chr;
+
+			this.read();
+
+			if( chr === '.' ) {
+
+				node = {
+
+					type: "Object",
+					object: node,
+					property: this.parseVariable()
+				};
+			}
+
+			else if ( chr === '[' ) {
+
+				// this.read();
+
+				node = {
+
+					type: "Object",
+					object: node,
+					property: this.parseToken()
+				};
+			}
+
+			
+		}
+
+		/*if( this.is('(') ) {
+
+			node = this.parseFunctionCall();
+		}*/
+
+		return node;
+	},
+
+	parseFunctionCall: function () {
+
+		return {
+
+			type: 'Callable',
+			value: '',
+			args: ''
+		}
 	}
 };
 
