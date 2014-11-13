@@ -7,6 +7,11 @@ describe('Parser', function () {
 
 	it("should parse a string", function () {
 
+		expect(parse("'  '")).toEqual({
+			type : "String",
+			value : "  "
+		});
+
 		expect(parse("'test'")).toEqual({
 			type : "String",
 			value : "test"
@@ -121,6 +126,27 @@ describe('Parser', function () {
 		});
 	});
 
+	it("should parse a statement", function () {
+
+		console.log(JSON.stringify(parse("12 + 34"), null, "\t"))
+
+		// expect(parse("1 + 1")).toEqual({
+		//     type: 'Callable',
+		//     callable: {
+		//         type: 'Identifier',
+		//         value: 'foo'
+		//     }
+		// });
+
+		// expect(parse("foo('bar')")).toEqual({
+		//     type: 'Callable',
+		//     callable: {
+		//         type: 'Identifier',
+		//         value: 'foo'
+		//     }
+		// });
+	});
+
 	it("should parse a callable", function () {
 
 		// console.log(JSON.stringify(parse("bar.foo()"), null, "\t"))
@@ -132,5 +158,13 @@ describe('Parser', function () {
 		        value: 'foo'
 		    }
 		});
+
+		// expect(parse("foo('bar')")).toEqual({
+		//     type: 'Callable',
+		//     callable: {
+		//         type: 'Identifier',
+		//         value: 'foo'
+		//     }
+		// });
 	});
 });

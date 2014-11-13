@@ -10,6 +10,16 @@ function Parser ( expression ) {
 
 Parser.prototype = {
 
+	binaryOperators: {
+
+		'||': 1, '&&': 2, '|': 3,  '^': 4,  '&': 5,
+		'==': 6, '!=': 6, '===': 6, '!==': 6,
+		'<': 7,  '>': 7,  '<=': 7,  '>=': 7, 
+		'<<':8,  '>>': 8, '>>>': 8,
+		'+': 9, '-': 9,
+		'*': 10, '/': 10, '%': 10
+	},
+
 	parse: function () {
 
 		var token;
@@ -66,8 +76,13 @@ Parser.prototype = {
 	parseExpression: function () {
 
 		var left = this.parseToken(),
-			operator = this.parseBinaryOperator(),
+			operator = this.parseOperator(),
 			right;
+
+		if( !operator ) {
+
+			return left;
+		}
 
 		return left;
 	},
@@ -92,9 +107,42 @@ Parser.prototype = {
 		return this.parseVariable();
 	},
 
-	parseBinaryOperator: function () {
+	parseOperator: function () {
 
+		var //operators = '+-!%^&|',
+			chr = this.chr,
+			two = this.chr+this.peek(),
+			three = two+this.peek(2),
+			i = 0,
+			j = 0;
 
+		if( !this.chr ) {
+
+			return null;
+		}
+
+		for ( ; i <= 3; i++ ) {
+
+			if( this.binaryOperators.hasOwnProperty(chr) ) {
+
+				for( ; j <= i; j++ ) {
+
+					this.read();
+				}
+
+				this.read(true);
+
+				return {
+
+					value: chr,
+					precedence: this.binaryOperators[chr]
+				};
+			}
+
+			chr += this.text[this.index];
+		}
+
+		return null;
 	},
 
 	/**
@@ -102,7 +150,12 @@ Parser.prototype = {
 	 *
 	 * @return {Boolean}
 	 */
-	read: function () {
+	read: function ( skipWhitespaceOnly ) {
+
+		if( skipWhitespaceOnly && this.chr !== ' ' ) {
+
+			return true;
+		}
 
 		this.index += 1;
 
@@ -121,6 +174,7 @@ Parser.prototype = {
 	 */
 	peek: function ( i ) {
 
+		return this.text[this.index + (i || 1)] || '';
 	},
 
 	/**
@@ -175,6 +229,10 @@ Parser.prototype = {
 			value += this.chr;
 		}
 
+		// Skip qoute
+		this.read();
+		this.read(true);
+
 		return {
 
 			type: "String",
@@ -191,11 +249,15 @@ Parser.prototype = {
 
 		while ( this.read() ) {
 
-			if( this.is('0123456789.') ) {
+			if( !this.is('0123456789.') ) {
 
-				value += this.chr;
+				break;
 			}
+
+			value += this.chr;
 		}
+
+		this.read(true);
 
 		return {
 
@@ -248,6 +310,8 @@ Parser.prototype = {
 			value += this.chr;
 		}
 
+		this.read(true);
+
 		return {
 
 			type: "Identifier",
@@ -290,6 +354,8 @@ Parser.prototype = {
 					object: node,
 					property: this.parseToken()
 				};
+
+				this.read();
 			}
 
 			else if ( chr === '(' ) {
@@ -308,6 +374,8 @@ Parser.prototype = {
 				}
 			}
 		}
+
+		this.read(true);
 
 		return node;
 	},
