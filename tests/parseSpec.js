@@ -22,4 +22,30 @@ describe('Parser', function () {
 			value : "test\n\t"
 		});
 	});
+
+	it("should parse a number", function () {
+
+		expect(parse("12")).toEqual({
+			type : "Value",
+			value : 12
+		});
+
+		expect(parse("12.24")).toEqual({
+			type : "Value",
+			value : 12.24
+		});
+	});
+
+	it("should parse a identifier", function () {
+
+		expect(parse("foo")).toEqual({
+			type : "Identifier",
+			value : "foo"
+		});
+
+		expect(parse("$foo")).toEqual({
+			type : "Identifier",
+			value : "$foo"
+		});
+	});
 });
