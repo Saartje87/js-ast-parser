@@ -362,7 +362,28 @@ Parser.prototype = {
 
 	parseArguments: function () {
 
-		return null;
+		var node,
+			args = [];
+
+		while( node = this.parseExpression() ) {
+
+			args.push(node);
+
+			this.read(true);
+
+			if( this.chr === ',' ) {
+
+				this.read();
+				this.read(true);
+			}
+		}
+
+		if( this.chr !== ')' ) {
+
+			throw Error("Unexpected end");
+		}
+
+		return args.length ? args : null;
 	}
 };
 

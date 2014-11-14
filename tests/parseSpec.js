@@ -126,7 +126,7 @@ describe('Parser', function () {
 		});
 	});
 
-	it("should parse an expression", function () {
+	it("should parse simple expression", function () {
 
 		// console.log(JSON.stringify(parse("12 + 34"), null, "\t"))
 
@@ -159,7 +159,7 @@ describe('Parser', function () {
 
 	it("should parse a callable", function () {
 
-		// console.log(JSON.stringify(parse("bar.foo()"), null, "\t"))
+		// console.log(JSON.stringify(parse("foo('bar', 2)"), null, "\t"))
 
 		expect(parse("foo()")).toEqual({
 		    type: 'Callable',
@@ -169,12 +169,37 @@ describe('Parser', function () {
 		    }
 		});
 
-		// expect(parse("foo('bar')")).toEqual({
-		//     type: 'Callable',
-		//     callable: {
-		//         type: 'Identifier',
-		//         value: 'foo'
-		//     }
-		// });
+		expect(parse("foo.bar()")).toEqual({
+			"type": "Object",
+			"object": {
+				"type": "Identifier",
+				"value": "foo"
+			},
+			"property": {
+				"type": "Callable",
+				"callable": {
+					"type": "Identifier",
+					"value": "bar"
+				}
+			}
+		});
+
+		expect(parse("foo('bar', 2)")).toEqual({
+			"type": "Callable",
+			"callable": {
+				"type": "Identifier",
+				"value": "foo"
+			},
+			"args": [
+				{
+					"type": "String",
+					"value": "bar"
+				},
+				{
+					"type": "Value",
+					"value": 2
+				}
+			]
+		});
 	});
 });
