@@ -22,53 +22,7 @@ Parser.prototype = {
 
 	parse: function () {
 
-		var token;
-
 		this.read();
-
-		/*if( this.is('[') ) {
-
-			node = this.parseArray();
-		} else if ( this.is('{') ) {
-
-			node = this.parseGroup();
-		} else if ( this.is('(') ) {
-
-			node = this.parseGroup();
-		}*/
-
-		return this.parseExpression();
-
-		var tokens = [],
-			token;
-
-		while ( this.read() ) {
-
-			// if( this.is('[') ) {
-
-			// }
-
-			/*token = this.parseExpression();
-
-			// Matches " or '
-			if( this.is('"\'') ) {
-
-				token = this.parseString();
-			}
-
-			else if ( this.is('(') ) {
-
-				// parse group
-			}
-
-			// Add token
-			if( token ) {
-
-				tokens.push(token);
-			}
-
-			token = null;*/
-		}
 
 		return this.parseExpression();
 	},
@@ -84,8 +38,6 @@ Parser.prototype = {
 
 			return left;
 		}
-
-		console.log('!?', this.chr, this.text);
 
 		right = this.parseToken();
 
