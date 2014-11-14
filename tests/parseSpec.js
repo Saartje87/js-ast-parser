@@ -1,3 +1,15 @@
+// @todos
+// a || b || 'thiees'
+// (a * 2) + 10
+// funcA() || funcB()
+// [1, 2]
+// {foo: 'bar'}
+// !!foo
+// ('foo')
+// [['foo'], [2]]
+// true ? 'yes' : 'no'
+
+
 describe('Parser', function () {
 
 	function parse ( expression ) {
