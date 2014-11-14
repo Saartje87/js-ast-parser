@@ -19,7 +19,10 @@ Javascript AST parser for 'simple' expressions.
 * ('foo')
 * [['foo'], [2]]
 * true ? 'yes' : 'no'
+* true
+* false
+* null
 
 ### Add support for parseErrors
 
-* 
+*
