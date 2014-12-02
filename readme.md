@@ -2,6 +2,12 @@
 
 Javascript AST parser for 'simple' expressions.
 
+## Run tests
+
+~~~bash
+karma run karma.conf.js
+~~~
+
 ## Supported expressions
 
 * binary operators (+-%/)
