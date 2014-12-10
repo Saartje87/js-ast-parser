@@ -5,7 +5,18 @@ Javascript AST parser for 'simple' expressions.
 ## Run tests
 
 ~~~bash
-karma run karma.conf.js
+karma start
+~~~
+
+## Usage
+
+~~~js
+// var tokens = Tokenize('1 + foo');
+var fn = Compile('1 + foo');
+// fn.tokens
+// fn.tokens.watchers -> i guess only variable names have to be watched
+// Obj.$watch(fn.tokens.watchers, function () { /* Handle changes `fn(Obj)` */ })
+fn({foo: 9}); // => 10
 ~~~
 
 ## Supported expressions

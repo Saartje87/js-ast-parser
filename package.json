@@ -7,7 +7,7 @@
     "example": "examples"
   },
   "scripts": {
-    "test": "test"
+    "test": "karma start"
   },
   "repository": {
     "type": "git",
