@@ -1,10 +1,28 @@
+/**
+ * Wrapper function that tokenize input
+ *
+ * @return {Tree}
+ */
+function Tokenize ( expression ) {
+
+	try {
+
+		return (new Parser(expression)).parse();
+	} catch ( e ) {
+
+		throw e;
+	}
+}
+
 function Parser ( expression ) {
 
 	expression = String(expression).trim();
 
 	this.text = expression;
 	this.length = expression.length;
+	// 
 	this.index = -1;
+	// Current character being parsed
 	this.chr = null;
 };
 
@@ -20,6 +38,9 @@ Parser.prototype = {
 		'*': 10, '/': 10, '%': 10
 	},
 
+	/**
+	 *
+	 */
 	parse: function () {
 
 		this.read();
@@ -27,6 +48,9 @@ Parser.prototype = {
 		return this.parseExpression();
 	},
 
+	/**
+	 *
+	 */
 	parseExpression: function () {
 
 		var left = this.parseToken(),
@@ -44,6 +68,9 @@ Parser.prototype = {
 		return this.createBinaryExpression(operator.value, left, right);
 	},
 
+	/**
+	 *
+	 */
 	createBinaryExpression: function ( operator, left, right ) {
 
 		var type = (operator === '||' || operator === '&&') ? 'LogicalExpression' : 'BinaryExpression';
@@ -56,6 +83,9 @@ Parser.prototype = {
 		};
 	},
 
+	/**
+	 *
+	 */
 	parseToken: function () {
 
 		if( this.is('0123456789') ) {
@@ -76,6 +106,9 @@ Parser.prototype = {
 		return this.parseVariable();
 	},
 
+	/**
+	 *
+	 */
 	parseOperator: function () {
 
 		var chr = this.chr,
@@ -150,6 +183,9 @@ Parser.prototype = {
 		return this.text[this.index + (i || 1)] || '';
 	},
 
+	/**
+	 *
+	 */
 	skip: function ( i ) {
 
 		this.index += i - 1;
@@ -299,6 +335,9 @@ Parser.prototype = {
 		};
 	},
 
+	/**
+	 *
+	 */
 	parseVariable: function () {
 
 		var node,
@@ -360,6 +399,9 @@ Parser.prototype = {
 		return node;
 	},
 
+	/**
+	 *
+	 */
 	parseArguments: function () {
 
 		var node,

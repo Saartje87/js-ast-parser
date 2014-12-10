@@ -12,29 +12,24 @@
 
 describe('Parser', function () {
 
-	function parse ( expression ) {
-
-		return (new Parser(expression)).parse()
-	};
-
 	it("should parse a string", function () {
 
-		expect(parse("'  '")).toEqual({
+		expect(Tokenize("'  '")).toEqual({
 			type : "String",
 			value : "  "
 		});
 
-		expect(parse("'test'")).toEqual({
+		expect(Tokenize("'test'")).toEqual({
 			type : "String",
 			value : "test"
 		});
 
-		expect(parse("'test\\'n'")).toEqual({
+		expect(Tokenize("'test\\'n'")).toEqual({
 			type : "String",
 			value : "test'n"
 		});
 
-		expect(parse("'test\n\t'")).toEqual({
+		expect(Tokenize("'test\n\t'")).toEqual({
 			type : "String",
 			value : "test\n\t"
 		});
@@ -42,12 +37,12 @@ describe('Parser', function () {
 
 	it("should parse a number", function () {
 
-		expect(parse("12")).toEqual({
+		expect(Tokenize("12")).toEqual({
 			type : "Value",
 			value : 12
 		});
 
-		expect(parse("12.24")).toEqual({
+		expect(Tokenize("12.24")).toEqual({
 			type : "Value",
 			value : 12.24
 		});
@@ -55,12 +50,12 @@ describe('Parser', function () {
 
 	it("should parse a identifier", function () {
 
-		expect(parse("foo")).toEqual({
+		expect(Tokenize("foo")).toEqual({
 			type : "Identifier",
 			value : "foo"
 		});
 
-		expect(parse("$foo")).toEqual({
+		expect(Tokenize("$foo")).toEqual({
 			type : "Identifier",
 			value : "$foo"
 		});
@@ -68,7 +63,7 @@ describe('Parser', function () {
 
 	it("should parse a object identifier", function () {
 
-		expect(parse("foo.bar")).toEqual({
+		expect(Tokenize("foo.bar")).toEqual({
 			type : "Object",
 			object : {
 
@@ -82,7 +77,7 @@ describe('Parser', function () {
 			}
 		});
 
-		expect(parse("foo[0]")).toEqual({
+		expect(Tokenize("foo[0]")).toEqual({
 		    type: 'Object',
 		    object: {
 		        type: 'Identifier',
@@ -94,7 +89,7 @@ describe('Parser', function () {
 		    }
 		});
 
-		expect(parse("foo[bar]")).toEqual({
+		expect(Tokenize("foo[bar]")).toEqual({
 		    type: 'Object',
 		    object: {
 		        type: 'Identifier',
@@ -106,7 +101,7 @@ describe('Parser', function () {
 		    }
 		});
 
-		expect(parse("foo['bar']")).toEqual({
+		expect(Tokenize("foo['bar']")).toEqual({
 		    type: 'Object',
 		    object: {
 		        type: 'Identifier',
@@ -118,7 +113,7 @@ describe('Parser', function () {
 		    }
 		});
 
-		expect(parse("foo.bar.baz")).toEqual({
+		expect(Tokenize("foo.bar.baz")).toEqual({
 			type: 'Object',
 			object: {
 			    type: 'Identifier',
@@ -140,9 +135,9 @@ describe('Parser', function () {
 
 	it("should parse simple expression", function () {
 
-		// console.log(JSON.stringify(parse("12 + 34"), null, "\t"))
+		// console.log(JSON.stringify(Tokenize("12 + 34"), null, "\t"))
 
-		expect(parse("12 + 34")).toEqual({
+		expect(Tokenize("12 + 34")).toEqual({
 			"type": "BinaryExpression",
 			"operator": "+",
 			"left": {
@@ -155,7 +150,7 @@ describe('Parser', function () {
 			}
 		});
 
-		expect(parse("4 || 5")).toEqual({
+		expect(Tokenize("4 || 5")).toEqual({
 			"type": "LogicalExpression",
 			"operator": "||",
 			"left": {
@@ -171,9 +166,9 @@ describe('Parser', function () {
 
 	it("should parse a callable", function () {
 
-		// console.log(JSON.stringify(parse("foo('bar', 2)"), null, "\t"))
+		// console.log(JSON.stringify(Tokenize("foo('bar', 2)"), null, "\t"))
 
-		expect(parse("foo()")).toEqual({
+		expect(Tokenize("foo()")).toEqual({
 		    type: 'Callable',
 		    callable: {
 		        type: 'Identifier',
@@ -181,7 +176,7 @@ describe('Parser', function () {
 		    }
 		});
 
-		expect(parse("foo.bar()")).toEqual({
+		expect(Tokenize("foo.bar()")).toEqual({
 			"type": "Object",
 			"object": {
 				"type": "Identifier",
@@ -196,7 +191,7 @@ describe('Parser', function () {
 			}
 		});
 
-		expect(parse("foo('bar', 2)")).toEqual({
+		expect(Tokenize("foo('bar', 2)")).toEqual({
 			"type": "Callable",
 			"callable": {
 				"type": "Identifier",
