@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Sandwich expression</title>
+</head>
+<body>
+	
+	<textarea onkeyup="printparse(this.value)"></textarea>
+	
+	<h3>Output</h3>
+	<pre></pre>
+
+	<h3>Compiled</h3>
+	
+	<script src="../src/parser.js"></script>
+	<script>
+	function printparse( expression ) {
+
+		console.time('parse');
+
+		var tree,
+			start = Date.now();
+
+		try {
+
+			tree = Tokenize(expression);
+		} catch ( e ) {
+
+			document.querySelector('pre').textContent = e.message;
+
+			throw e;
+		}
+
+		console.timeEnd('parse');
+
+		document.querySelector('pre').textContent = JSON.stringify(tree, null, "\t")+"\ntime: "+(Date.now() - start)+'ms';
+	}
+	</script>
+
+</body>
+</html>
