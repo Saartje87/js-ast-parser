@@ -28,6 +28,7 @@ function Parser ( expression ) {
 
 Parser.prototype = {
 
+	// Shoud be a weakmap (? prototype-less object)
 	binaryOperators: {
 
 		'||': 1, '&&': 2, '|': 3,  '^': 4,  '&': 5,
@@ -90,7 +91,7 @@ Parser.prototype = {
 
 		if( this.is('0123456789') ) {
 
-			return this.parseNumber()
+			return this.parseNumber();
 		}
 
 		if( this.is('"\'') ) {
@@ -238,7 +239,6 @@ Parser.prototype = {
 
 			if( this.chr === void 0 ) {
 
-				console.log(value);
 				throw Error('Parse error, unexpected end');
 			}
 
