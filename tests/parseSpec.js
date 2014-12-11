@@ -208,5 +208,19 @@ describe('Parser', function () {
 				}
 			]
 		});
+
+		expect(Tokenize("foo('bar' )")).toEqual({
+			"type": "Callable",
+			"callable": {
+				"type": "Identifier",
+				"value": "foo"
+			},
+			"args": [
+				{
+					"type": "String",
+					"value": "bar"
+				}
+			]
+		});
 	});
 });

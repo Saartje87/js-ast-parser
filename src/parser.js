@@ -239,7 +239,7 @@ Parser.prototype = {
 
 			if( this.chr === void 0 ) {
 
-				throw Error('Parse error, unexpected end');
+				throw Error('Unexpected string end');
 			}
 
 			value += this.chr;
@@ -407,6 +407,8 @@ Parser.prototype = {
 		var node,
 			args = [];
 
+		this.read(true);
+
 		while( node = this.parseExpression() ) {
 
 			args.push(node);
@@ -420,9 +422,11 @@ Parser.prototype = {
 			}
 		}
 
+		this.read(true);
+
 		if( this.chr !== ')' ) {
 
-			throw Error("Unexpected end");
+			throw Error("Unexpected function end");
 		}
 
 		return args.length ? args : null;
