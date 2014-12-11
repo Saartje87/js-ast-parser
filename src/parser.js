@@ -367,11 +367,13 @@ Parser.prototype = {
 
 			else if ( chr === '[' ) {
 
+				args = node && node.type === 'Identifier';
+
 				node = {
 
-					type: "Object",
+					type: args ? 'Object' : 'Array',
 					object: node,
-					property: this.parseToken()
+					property: args ? this.parseToken() : this.parseArguments()
 				};
 
 				this.read();
@@ -424,7 +426,7 @@ Parser.prototype = {
 
 		this.read(true);
 
-		if( this.chr !== ')' ) {
+		if( this.chr !== ')' && this.chr !== ']' ) {
 
 			throw Error("Unexpected function end");
 		}

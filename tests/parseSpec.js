@@ -246,5 +246,113 @@ describe('Parser', function () {
 				}
 			]
 		});
+
+		expect(Tokenize("foo(a(a, 1, foo()), b()).then(a).always()")).toEqual({
+			"type": "Object",
+			"object": {
+				"type": "Callable",
+				"callable": {
+					"type": "Identifier",
+					"value": "foo"
+				},
+				"args": [
+					{
+						"type": "Callable",
+						"callable": {
+							"type": "Identifier",
+							"value": "a"
+						},
+						"args": [
+							{
+								"type": "Identifier",
+								"value": "a"
+							},
+							{
+								"type": "Value",
+								"value": 1
+							},
+							{
+								"type": "Callable",
+								"callable": {
+									"type": "Identifier",
+									"value": "foo"
+								}
+							}
+						]
+					},
+					{
+						"type": "Callable",
+						"callable": {
+							"type": "Identifier",
+							"value": "b"
+						}
+					}
+				]
+			},
+			"property": {
+				"type": "Object",
+				"object": {
+					"type": "Callable",
+					"callable": {
+						"type": "Identifier",
+						"value": "then"
+					},
+					"args": [
+						{
+							"type": "Identifier",
+							"value": "a"
+						}
+					]
+				},
+				"property": {
+					"type": "Callable",
+					"callable": {
+						"type": "Identifier",
+						"value": "always"
+					}
+				}
+			}
+		});
+	});
+
+
+
+	it("should parse Array", function () {
+
+		expect(Tokenize("[1, 2, 4]")).toEqual({
+			"type": "Array",
+			"property": [
+				{
+					"type": "Value",
+					"value": 1
+				},
+				{
+					"type": "Value",
+					"value": 2
+				},
+				{
+					"type": "Value",
+					"value": 4
+				}
+			]
+		});
+
+		// expect(Tokenize("[1, 2, 4, [8]]")).toEqual({
+		// 	"type": "Array",
+		// 	"property": [
+		// 		{
+		// 			"type": "Value",
+		// 			"value": 1
+		// 		},
+		// 		{
+		// 			"type": "Value",
+		// 			"value": 2
+		// 		},
+		// 		{
+		// 			"type": "Value",
+		// 			"value": 4
+		// 		}
+		// 	]
+		// });
 	});
 });
