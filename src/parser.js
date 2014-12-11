@@ -429,6 +429,8 @@ Parser.prototype = {
 			throw Error("Unexpected function end");
 		}
 
+		this.read();
+
 		return args.length ? args : null;
 	}
 };
