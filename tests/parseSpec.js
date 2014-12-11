@@ -337,22 +337,31 @@ describe('Parser', function () {
 			]
 		});
 
-		// expect(Tokenize("[1, 2, 4, [8]]")).toEqual({
-		// 	"type": "Array",
-		// 	"property": [
-		// 		{
-		// 			"type": "Value",
-		// 			"value": 1
-		// 		},
-		// 		{
-		// 			"type": "Value",
-		// 			"value": 2
-		// 		},
-		// 		{
-		// 			"type": "Value",
-		// 			"value": 4
-		// 		}
-		// 	]
-		// });
+		expect(Tokenize("[1, 2, 4, [8]]")).toEqual({
+			"type": "Array",
+			"property": [
+				{
+					"type": "Value",
+					"value": 1
+				},
+				{
+					"type": "Value",
+					"value": 2
+				},
+				{
+					"type": "Value",
+					"value": 4
+				},
+				{
+					"type": "Array",
+					"property": [
+						{
+							"type": "Value",
+							"value": 8
+						}
+					]
+				}
+			]
+		});
 	});
 });

@@ -431,7 +431,7 @@ Parser.prototype = {
 			throw Error("Unexpected function end");
 		}
 
-		this.read();
+		this.read(this.chr === ']');
 
 		return args.length ? args : null;
 	}
