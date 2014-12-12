@@ -164,6 +164,30 @@ describe('Parser', function () {
 		});
 	});
 
+	it("should parse larger expression", function () {
+
+		expect(Tokenize("a || b || c")).toEqual({
+			"type": "LogicalExpression",
+			"operator": "||",
+			"left": {
+				"type": "LogicalExpression",
+				"operator": "||",
+				"left": {
+					"type": "Identifier",
+					"value": "a"
+				},
+				"right": {
+					"type": "Identifier",
+					"value": "b"
+				}
+			},
+			"right": {
+				"type": "Identifier",
+				"value": "c"
+			}
+		});
+	});
+
 	it("should parse a callable", function () {
 
 		// console.log(JSON.stringify(Tokenize("foo('bar', 2)"), null, "\t"))

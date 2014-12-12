@@ -53,7 +53,9 @@ Parser.prototype = {
 		var left = this.parseToken(),
 			operator = this.parseOperator(),
 			right,
-			node;
+			node,
+			stack,
+			i;
 
 		if( !operator ) {
 
@@ -62,7 +64,46 @@ Parser.prototype = {
 
 		right = this.parseToken();
 
-		return this.createBinaryExpression(operator.value, left, right);
+		if( !right ) {
+
+			throw Error("Expected expression after operator"+this.chr)
+		}
+
+		stack = [left, operator, right];
+
+		while( (operator = this.parseOperator()) ) {
+
+			while( (stack.length > 2) && (operator.precedence <= stack[stack.length - 2].precedence) ) {
+
+				right = stack.pop();
+				operator = stack.pop();
+				left = stack.pop();
+
+				node = this.createBinaryExpression(operator.value, left, right);
+
+				stack.push(node);
+			}
+
+			node = this.parseToken();
+
+			if( !node ) {
+
+				throw Error("Expected expression after operator")
+			}
+
+			stack.push(operator, node);
+		}
+
+		i = stack.length - 1;
+		node = stack[i];
+
+		while( i > 1 ) {
+
+			node = this.createBinaryExpression(stack[i - 1].value, stack[i - 2], node);
+			i -= 2;
+		}
+
+		return node;
 	},
 
 	/**
