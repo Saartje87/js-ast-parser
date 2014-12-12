@@ -38,16 +38,17 @@ fn({foo: 1});
 
 ## Roadmap
 
+* Performance
+* More opperators
+* Compile functionality
+
 ### Add support for
 
 * a || b || 'thiees'
 * (a * 2) + 10
-* funcA() || funcB()
-* [1, 2]
 * {foo: 'bar'}
 * !!foo
 * ('foo')
-* [['foo'], [2]]
 * true ? 'yes' : 'no'
 * true
 * false
@@ -85,6 +86,9 @@ foo['a'].bar.baz
 }
 
 foo(a(1), b(2))
+// fails
+
+a[1, 2]
 // fails
 ```
 
