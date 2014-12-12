@@ -315,9 +315,7 @@ describe('Parser', function () {
 		});
 	});
 
-
-
-	it("should parse Array", function () {
+	it("should parse Arrays", function () {
 
 		expect(Tokenize("[1, 2, 4]")).toEqual({
 			"type": "Array",
@@ -362,6 +360,17 @@ describe('Parser', function () {
 					]
 				}
 			]
+		});
+	});
+
+	it("should parse Groups", function () {
+
+		expect(Tokenize("('foo')")).toEqual({
+			"type": "Group",
+			"value": {
+				"type": "String",
+				"value": "foo"
+			}
 		});
 	});
 });

@@ -40,6 +40,7 @@ Parser.prototype = {
 
 		this.read();
 
+		// Unexpcted end when this.index !== this.length
 
 		return this.parseExpression();
 	},
@@ -428,6 +429,31 @@ Parser.prototype = {
 		this.read();
 
 		return args.length ? args : null;
+	},
+
+	/**
+	 *
+	 */
+	parseGroup: function () {
+
+		var node;
+
+		this.read();
+
+		node = this.parseExpression();
+
+		if( this.chr !== ')' ) {
+			
+			throw Error('Unexpected group end');
+		}
+
+		this.read();
+
+		return {
+
+			type: "Group",
+			value: node
+		};
 	}
 };
 
