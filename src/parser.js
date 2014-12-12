@@ -5,13 +5,7 @@
  */
 function Tokenize ( expression ) {
 
-	try {
-
-		return (new Parser(expression)).parse();
-	} catch ( e ) {
-
-		throw e;
-	}
+	return (new Parser(expression)).parse();
 }
 
 function Parser ( expression ) {
@@ -45,6 +39,7 @@ Parser.prototype = {
 	parse: function () {
 
 		this.read();
+
 
 		return this.parseExpression();
 	},
@@ -367,6 +362,7 @@ Parser.prototype = {
 
 			else if ( chr === '[' ) {
 
+				// If previous node is Identifier `foo[0]`
 				args = node && node.type === 'Identifier';
 
 				node = {
@@ -375,8 +371,6 @@ Parser.prototype = {
 					object: node,
 					property: args ? this.parseToken() : this.parseArguments()
 				};
-
-				this.read();
 			}
 
 			else if ( chr === '(' ) {
@@ -431,7 +425,7 @@ Parser.prototype = {
 			throw Error("Unexpected function end");
 		}
 
-		this.read(this.chr === ']');
+		this.read();
 
 		return args.length ? args : null;
 	}
