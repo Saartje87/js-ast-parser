@@ -448,5 +448,29 @@ describe('Parser', function () {
 				}
 			}
 		});
+
+		expect(Tokenize("(a + 2) * 10")).toEqual({
+			"type": "BinaryExpression",
+			"operator": "*",
+			"left": {
+				"type": "Group",
+				"value": {
+					"type": "BinaryExpression",
+					"operator": "+",
+					"left": {
+						"type": "Identifier",
+						"value": "a"
+					},
+					"right": {
+						"type": "Value",
+						"value": 2
+					}
+				}
+			},
+			"right": {
+				"type": "Value",
+				"value": 10
+			}
+		});
 	});
 });
