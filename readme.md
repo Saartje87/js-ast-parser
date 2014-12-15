@@ -37,6 +37,8 @@ fn({foo: 1});
 * Functions (foo(), foo('bar'))
 * Nested expressions (a || b && c)
 * Literals (true, false, null)
+* ConditionalExpressions (foo ? 'yes' : 'no')
+* Unary Expression (!foo, --bar)
 
 ## Roadmap
 
@@ -47,9 +49,7 @@ fn({foo: 1});
 
 ### Add support for
 
-* !!foo
-* true ? 'yes' : 'no'
-* foo = 'bar' // Assignment
+* foo = 'bar' // Assignment -> do we need this?
 
 ### Todo tests
 
