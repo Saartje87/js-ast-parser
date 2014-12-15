@@ -12,7 +12,7 @@
 
 describe('Parser', function () {
 
-	it("should parse a string", function () {
+	it("should parse Strings", function () {
 
 		expect(Tokenize("'  '")).toEqual({
 			type : "String",
@@ -35,7 +35,7 @@ describe('Parser', function () {
 		});
 	});
 
-	it("should parse a number", function () {
+	it("should parse Numbers", function () {
 
 		expect(Tokenize("12")).toEqual({
 			type : "Value",
@@ -48,7 +48,7 @@ describe('Parser', function () {
 		});
 	});
 
-	it("should parse a identifier", function () {
+	it("should parse Identifiers", function () {
 
 		expect(Tokenize("foo")).toEqual({
 			type : "Identifier",
