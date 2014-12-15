@@ -61,7 +61,25 @@ describe('Parser', function () {
 		});
 	});
 
-	it("should parse a object identifier", function () {
+	it("should parse Literals", function () {
+
+		expect(Tokenize("true")).toEqual({
+			type : "Literal",
+			value : "true"
+		});
+
+		expect(Tokenize("false")).toEqual({
+			type : "Literal",
+			value : "false"
+		});
+
+		expect(Tokenize("null")).toEqual({
+			type : "Literal",
+			value : "null"
+		});
+	});
+
+	it("should parse object Identifiers", function () {
 
 		expect(Tokenize("foo.bar")).toEqual({
 			type : "Object",

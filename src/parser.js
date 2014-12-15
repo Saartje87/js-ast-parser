@@ -33,6 +33,13 @@ Parser.prototype = {
 		'*': 10, '/': 10, '%': 10
 	},
 
+	literals: {
+
+		'true': true,
+		'false': true,
+		'null': true
+	},
+
 	/**
 	 *
 	 */
@@ -372,7 +379,7 @@ Parser.prototype = {
 
 		return {
 
-			type: "Identifier",
+			type: this.literals.hasOwnProperty(value) ? 'Literal' : 'Identifier',
 			value: value
 		};
 	},
