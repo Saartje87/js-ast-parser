@@ -6,21 +6,30 @@
 </head>
 <body>
 	
-	<textarea onkeyup="printparse(this.value)"></textarea>
+	<textarea onkeyup="printparse(this.value)">{'foo': parseExpression}</textarea>
 	
 	<h3>Output</h3>
+	<time></time>
 	<pre></pre>
 
-	<h3>Compiled</h3>
+	<!-- <h3>Compiled</h3> -->
 	
 	<script src="../src/parser.js"></script>
 	<script>
+	window.onload = function () {
+		
+		printparse(document.querySelector('textarea').value);
+	}
+
 	function printparse( expression ) {
 
 		console.time('parse');
 
 		var tree,
 			start = Date.now();
+
+			// tree = Tokenize(expression);
+		// tree = Tokenize(expression);
 
 		try {
 
@@ -29,12 +38,14 @@
 
 			document.querySelector('pre').textContent = e.message;
 
+			console.log(e);
 			throw e;
 		}
 
 		console.timeEnd('parse');
 
-		document.querySelector('pre').textContent = JSON.stringify(tree, null, "\t")+"\ntime: "+(Date.now() - start)+'ms';
+		document.querySelector('time').textContent = "time: "+(Date.now() - start)+'ms';
+		document.querySelector('pre').textContent = JSON.stringify(tree, null, "\t");
 	}
 	</script>
 
