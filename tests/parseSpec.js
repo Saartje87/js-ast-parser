@@ -594,4 +594,102 @@ describe('Parser', function () {
 			]
 		});
 	});
+
+	it("should parse ConditionalExpressions", function () {
+
+		expect(Tokenize("true ? 'yes' : 'no'")).toEqual({
+			"type": "ConditionalExpression",
+			"test": {
+				"type": "Literal",
+				"value": "true"
+			},
+			"consequent": {
+				"type": "String",
+				"value": "yes"
+			},
+			"alternate": {
+				"type": "String",
+				"value": "no"
+			}
+		});
+
+		expect(Tokenize("true || foo ? 'yes' : 'no'")).toEqual({
+			"type": "ConditionalExpression",
+			"test": {
+				"type": "LogicalExpression",
+				"operator": "||",
+				"left": {
+					"type": "Literal",
+					"value": "true"
+				},
+				"right": {
+					"type": "Identifier",
+					"value": "foo"
+				}
+			},
+			"consequent": {
+				"type": "String",
+				"value": "yes"
+			},
+			"alternate": {
+				"type": "String",
+				"value": "no"
+			}
+		});
+
+		expect(Tokenize("(true || foo) ? 'yes' : 'no'")).toEqual({
+			"type": "ConditionalExpression",
+			"test": {
+				"type": "Group",
+				"value": {
+					"type": "LogicalExpression",
+					"operator": "||",
+					"left": {
+						"type": "Literal",
+						"value": "true"
+					},
+					"right": {
+						"type": "Identifier",
+						"value": "foo"
+					}
+				}
+			},
+			"consequent": {
+				"type": "String",
+				"value": "yes"
+			},
+			"alternate": {
+				"type": "String",
+				"value": "no"
+			}
+		});
+
+		expect(Tokenize("{foo: true ? 'yes' : 'no'}")).toEqual({
+			"type": "Object",
+			"properties": [
+				{
+					"type": "Property",
+					"key": {
+						"type": "Identifier",
+						"value": "foo"
+					},
+					"value": {
+						"type": "ConditionalExpression",
+						"test": {
+							"type": "Literal",
+							"value": "true"
+						},
+						"consequent": {
+							"type": "String",
+							"value": "yes"
+						},
+						"alternate": {
+							"type": "String",
+							"value": "no"
+						}
+					}
+				}
+			]
+		});
+	});
 });

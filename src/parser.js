@@ -66,6 +66,11 @@ Parser.prototype = {
 
 		if( !operator ) {
 
+			if( this.chr === '?' ) {
+
+				return this.parseConditionalExpression(left);
+			}
+
 			return left;
 		}
 
@@ -108,6 +113,11 @@ Parser.prototype = {
 
 			node = this.createBinaryExpression(stack[i - 1].value, stack[i - 2], node);
 			i -= 2;
+		}
+
+		if( this.chr === '?' ) {
+
+			return this.parseConditionalExpression(node);
 		}
 
 		return node;
@@ -588,6 +598,43 @@ Parser.prototype = {
 			type: "Property",
 			key: key,
 			value: value
+		}
+	},
+
+	/**
+	 * foo ? true : false
+	 */
+	parseConditionalExpression: function ( left ) {
+
+		var consequent,
+			alternate;
+
+		if( this.chr !== '?' ) {
+
+			throw Error('Expected `?`');
+		}
+
+		this.read();
+		this.read(true);
+
+		consequent = this.parseExpression();
+
+		if( this.chr !== ':' ) {
+
+			throw Error('Expected `:`');
+		}
+
+		this.read();
+		this.read(true);
+
+		alternate = this.parseExpression();
+
+		return {
+
+			type: "ConditionalExpression",
+			test: left,
+			consequent: consequent,
+			alternate: alternate
 		}
 	}
 };
