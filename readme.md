@@ -42,13 +42,12 @@ fn({foo: 1});
 * Performance
 * More opperators
 * Compile functionality
+* Better and more usefull errors
 
 ### Add support for
 
-* (a * 2) + 10
 * {foo: 'bar'}
 * !!foo
-* (1 - 1) || (1 + 1)
 * true ? 'yes' : 'no'
 * true
 * false
