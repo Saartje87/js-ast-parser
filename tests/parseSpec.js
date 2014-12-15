@@ -473,4 +473,107 @@ describe('Parser', function () {
 			}
 		});
 	});
+
+	it("should parse Objects", function () {
+
+		expect(Tokenize("{foo: 'bar'}")).toEqual({
+			"type": "Object",
+			"properties": [
+				{
+					"type": "Property",
+					"key": {
+						"type": "Identifier",
+						"value": "foo"
+					},
+					"value": {
+						"type": "String",
+						"value": "bar"
+					}
+				}
+			]
+		});
+
+		expect(Tokenize("{'foo': 'bar'}")).toEqual({
+			"type": "Object",
+			"properties": [
+				{
+					"type": "Property",
+					"key": {
+						"type": "Identifier",
+						"value": "foo"
+					},
+					"value": {
+						"type": "String",
+						"value": "bar"
+					}
+				}
+			]
+		});
+
+		expect(Tokenize("{'foo': bar()}")).toEqual({
+			"type": "Object",
+			"properties": [
+				{
+					"type": "Property",
+					"key": {
+						"type": "Identifier",
+						"value": "foo"
+					},
+					"value": {
+						"type": "Callable",
+						"callable": {
+							"type": "Identifier",
+							"value": "bar"
+						}
+					}
+				}
+			]
+		});
+
+		expect(Tokenize("{foo: []}")).toEqual({
+			"type": "Object",
+			"properties": [
+				{
+					"type": "Property",
+					"key": {
+						"type": "Identifier",
+						"value": "foo"
+					},
+					"value": {
+						"type": "Array",
+						"property": null
+					}
+				}
+			]
+		});
+
+		expect(Tokenize("{foo: {bar: 'baz'}}")).toEqual({
+			"type": "Object",
+			"properties": [
+				{
+					"type": "Property",
+					"key": {
+						"type": "Identifier",
+						"value": "foo"
+					},
+					"value": {
+						"type": "Object",
+						"properties": [
+							{
+								"type": "Property",
+								"key": {
+									"type": "Identifier",
+									"value": "bar"
+								},
+								"value": {
+									"type": "String",
+									"value": "baz"
+								}
+							}
+						]
+					}
+				}
+			]
+		});
+	});
 });

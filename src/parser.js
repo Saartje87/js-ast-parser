@@ -141,6 +141,11 @@ Parser.prototype = {
 			return this.parseGroup();
 		}
 
+		if( this.is('{') ) {
+
+			return this.parseObject();
+		}
+
 		return this.parseVariable();
 	},
 
@@ -496,6 +501,87 @@ Parser.prototype = {
 			type: "Group",
 			value: node
 		};
+	},
+
+	/**
+	 * {foo: 'bar', baz: 'baq'}
+	 */
+	parseObject: function () {
+
+		var node,
+			properties = [];
+
+		this.read(true);
+
+		while( this.read() ) {
+
+			node = this.parseObjectProperty();
+
+			if( !node ) {
+
+				throw Error("Parse error");
+			}
+
+			properties.push(node);
+
+			if( this.chr === '}' ) {
+
+				break;
+			}
+
+			if( this.chr !== ',' ) {
+
+				throw Error("Expected `,`");
+			}
+
+			this.read();
+		}
+
+		if( this.chr !== '}' ) {
+
+			throw Error("Unexpected object end");
+		}
+
+		this.read();
+
+		return {
+
+			type: "Object",
+			properties: properties
+		};
+	},
+
+	/**
+	 * `baz: 'baq'`
+	 */
+	parseObjectProperty: function () {
+
+		var key,
+			value;
+
+		key = this.parseToken();
+		// Force `Identifier`
+		key.type = 'Identifier';
+
+		this.read(true);
+
+		if( this.chr !== ':' ) {
+
+			throw Error("Expected `:`");
+		}
+
+		this.read(true);
+		this.read();
+		this.read(true);
+
+		value = this.parseExpression();
+
+		return {
+
+			type: "Property",
+			key: key,
+			value: value
+		}
 	}
 };
 
