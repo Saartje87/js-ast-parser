@@ -36,6 +36,7 @@ fn({foo: 1});
 * Arrays (foo[0])
 * Functions (foo(), foo('bar'))
 * Nested expressions (a || b && c)
+* Literals (true, false, null)
 
 ## Roadmap
 
@@ -46,12 +47,9 @@ fn({foo: 1});
 
 ### Add support for
 
-* {foo: 'bar'}
 * !!foo
 * true ? 'yes' : 'no'
-* true
-* false
-* null
+* foo = 'bar' // Assignment
 
 ### Todo tests
 
