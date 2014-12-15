@@ -692,4 +692,47 @@ describe('Parser', function () {
 			]
 		});
 	});
+
+	it("should parse Unary Expression", function () {
+
+		expect(Tokenize("!foo")).toEqual({
+			"type": "UnaryExpression",
+			"operator": "!",
+			"value": {
+				"type": "Identifier",
+				"value": "foo"
+			}
+		});
+
+		expect(Tokenize("!!foo")).toEqual({
+			"type": "UnaryExpression",
+			"operator": "!",
+			"value": {
+				"type": "UnaryExpression",
+				"operator": "!",
+				"value": {
+					"type": "Identifier",
+					"value": "foo"
+				}
+			}
+		});
+
+		expect(Tokenize("-foo")).toEqual({
+			"type": "UnaryExpression",
+			"operator": "-",
+			"value": {
+				"type": "Identifier",
+				"value": "foo"
+			}
+		});
+
+		expect(Tokenize("--foo")).toEqual({
+			"type": "UnaryExpression",
+			"operator": "--",
+			"value": {
+				"type": "Identifier",
+				"value": "foo"
+			}
+		});
+	});
 });

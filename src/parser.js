@@ -143,6 +143,11 @@ Parser.prototype = {
 	 */
 	parseToken: function () {
 
+		if( this.is('+-!') ) {
+
+			return this.parseUnaryExpression();
+		}
+
 		if( this.is('0123456789') ) {
 
 			return this.parseNumber();
@@ -636,6 +641,33 @@ Parser.prototype = {
 			consequent: consequent,
 			alternate: alternate
 		}
+	},
+
+	/**
+	 * -foo
+	 * +foo
+	 * !foo
+	 */
+	parseUnaryExpression: function () {
+
+		var value = this.chr;
+
+		this.read();
+
+		if( this.is('+-') ) {
+
+			value += this.chr;
+
+			this.read();
+		}
+
+		return {
+
+			type: "UnaryExpression",
+			operator: value,
+			value: this.parseExpression()
+
+		};
 	}
 };
 
