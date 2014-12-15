@@ -35,6 +35,7 @@ fn({foo: 1});
 * Objects (foo.bar, foo['bar'])
 * Arrays (foo[0])
 * Functions (foo(), foo('bar'))
+* Nested expressions (a || b && c)
 
 ## Roadmap
 
@@ -44,11 +45,10 @@ fn({foo: 1});
 
 ### Add support for
 
-* a || b || 'thiees'
 * (a * 2) + 10
 * {foo: 'bar'}
 * !!foo
-* ('foo')
+* (1 - 1) || (1 + 1)
 * true ? 'yes' : 'no'
 * true
 * false
