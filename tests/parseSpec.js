@@ -396,5 +396,16 @@ describe('Parser', function () {
 				"value": "foo"
 			}
 		});
+
+		expect(Tokenize("(foo())")).toEqual({
+			"type": "Group",
+			"value": {
+				"type": "Callable",
+				"callable": {
+					"type": "Identifier",
+					"value": "foo"
+				}
+			}
+		});
 	});
 });
