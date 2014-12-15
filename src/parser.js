@@ -489,6 +489,7 @@ Parser.prototype = {
 		}
 
 		this.read();
+		this.read(true);
 
 		return {
 

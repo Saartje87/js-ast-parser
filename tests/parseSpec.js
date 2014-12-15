@@ -407,5 +407,46 @@ describe('Parser', function () {
 				}
 			}
 		});
+
+		expect(Tokenize("(a) || (b)")).toEqual({
+			"type": "LogicalExpression",
+			"operator": "||",
+			"left": {
+				"type": "Group",
+				"value": {
+					"type": "Identifier",
+					"value": "a"
+				}
+			},
+			"right": {
+				"type": "Group",
+				"value": {
+					"type": "Identifier",
+					"value": "b"
+				}
+			}
+		});
+
+		expect(Tokenize("((a) || (b))")).toEqual({
+			"type": "Group",
+			"value": {
+				"type": "LogicalExpression",
+				"operator": "||",
+				"left": {
+					"type": "Group",
+					"value": {
+						"type": "Identifier",
+						"value": "a"
+					}
+				},
+				"right": {
+					"type": "Group",
+					"value": {
+						"type": "Identifier",
+						"value": "b"
+					}
+				}
+			}
+		});
 	});
 });
