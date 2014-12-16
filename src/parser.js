@@ -652,6 +652,7 @@ Parser.prototype = {
 	 * -foo
 	 * +foo
 	 * !foo
+	 * !!foo
 	 */
 	parseUnaryExpression: function () {
 
@@ -659,6 +660,7 @@ Parser.prototype = {
 
 		this.read();
 
+		// For -- or ++
 		if( this.is('+-') ) {
 
 			value += this.chr;
