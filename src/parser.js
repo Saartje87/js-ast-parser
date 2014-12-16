@@ -431,14 +431,19 @@ Parser.prototype = {
 
 			else if ( chr === '[' ) {
 
-				// If previous node is Identifier `foo[0]`
-				args = node && node.type === 'Identifier';
+				var previousIsIdentifier = node && node.type === 'Identifier';
+				args = this.parseArguments();
+
+				if( previousIsIdentifier && args.length > 1 ) {
+
+					throw Error("Expected only 1 Identifier");
+				}
 
 				node = {
 
-					type: args ? 'Object' : 'Array',
+					type: previousIsIdentifier ? 'Object' : 'Array',
 					object: node,
-					property: args ? this.parseToken() : this.parseArguments()
+					property: previousIsIdentifier ? args[0] : args
 				};
 			}
 
