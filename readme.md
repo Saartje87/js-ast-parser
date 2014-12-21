@@ -49,6 +49,7 @@ fn({foo: 1});
 
 ### Add support for
 
+* foo++
 * foo = 'bar' // Assignment -> do we need this?
 
 ### Todo tests
@@ -82,11 +83,6 @@ foo['a'].bar.baz
 	}
 }
 
-foo(a(1), b(2))
-// fails
-
-a[1, 2]
-// fails
 ```
 
 ### Add support for parseErrors
