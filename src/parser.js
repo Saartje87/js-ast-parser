@@ -14,11 +14,11 @@ function Parser ( expression ) {
 
 	this.text = expression;
 	this.length = expression.length;
-	// 
+	//
 	this.index = -1;
 	// Current character being parsed
 	this.chr = null;
-};
+}
 
 Parser.prototype = {
 
@@ -27,7 +27,7 @@ Parser.prototype = {
 
 		'||': 1, '&&': 2, '|': 3,  '^': 4,  '&': 5,
 		'==': 6, '!=': 6, '===': 6, '!==': 6,
-		'<': 7,  '>': 7,  '<=': 7,  '>=': 7, 
+		'<': 7,  '>': 7,  '<=': 7,  '>=': 7,
 		'<<':8,  '>>': 8, '>>>': 8,
 		'+': 9, '-': 9,
 		'*': 10, '/': 10, '%': 10
@@ -78,7 +78,7 @@ Parser.prototype = {
 
 		if( !right ) {
 
-			throw Error("Expected expression after operator"+this.chr)
+			throw Error("Expected expression after operator"+this.chr);
 		}
 
 		stack = [left, operator, right];
@@ -100,7 +100,7 @@ Parser.prototype = {
 
 			if( !node ) {
 
-				throw Error("Expected expression after operator")
+				throw Error("Expected expression after operator");
 			}
 
 			stack.push(operator, node);
@@ -129,7 +129,7 @@ Parser.prototype = {
 	createBinaryExpression: function ( operator, left, right ) {
 
 		var type = (operator === '||' || operator === '&&') ? 'LogicalExpression' : 'BinaryExpression';
-		
+
 		return {
 			type: type,
 			operator: operator,
@@ -282,7 +282,7 @@ Parser.prototype = {
 
 				// Escaped qoute
 				if( this.chr === qoute ) {
-						
+
 					value += qoute;
 					continue;
 				}
@@ -329,7 +329,7 @@ Parser.prototype = {
 
 		while ( this.read() ) {
 
-			if( !this.is('0123456789.') ) {
+			if( !this.is('0123456789.e') ) {
 
 				break;
 			}
@@ -431,7 +431,9 @@ Parser.prototype = {
 
 			else if ( chr === '[' ) {
 
-				var previousIsIdentifier = node && node.type === 'Identifier';
+				var previousIsIdentifier = node && node.type === 'Identifier',
+					prevNode = node;
+
 				args = this.parseArguments();
 
 				if( previousIsIdentifier && args.length > 1 ) {
@@ -442,9 +444,12 @@ Parser.prototype = {
 				node = {
 
 					type: previousIsIdentifier ? 'Object' : 'Array',
-					object: node,
 					property: previousIsIdentifier ? args[0] : args
 				};
+
+				if( prevNode ) {
+					node.object = prevNode;
+				}
 			}
 
 			else if ( chr === '(' ) {
@@ -485,10 +490,22 @@ Parser.prototype = {
 
 			this.read(true);
 
-			if( this.chr === ',' ) {
+			if( this.is(')]') ) {
 
-				this.read();
-				this.read(true);
+				break;
+			}
+
+			if( this.chr !== ',' ) {
+
+				throw Error("What here?");
+			}
+
+			this.read();
+			this.read(true);
+
+			if( this.is(')]') ) {
+
+				throw Error("Unexpected argument end");
 			}
 		}
 
@@ -516,7 +533,7 @@ Parser.prototype = {
 		node = this.parseExpression();
 
 		if( this.chr !== ')' ) {
-			
+
 			throw Error('Unexpected group end');
 		}
 
@@ -608,7 +625,7 @@ Parser.prototype = {
 			type: "Property",
 			key: key,
 			value: value
-		}
+		};
 	},
 
 	/**
@@ -645,7 +662,7 @@ Parser.prototype = {
 			test: left,
 			consequent: consequent,
 			alternate: alternate
-		}
+		};
 	},
 
 	/**
@@ -677,4 +694,3 @@ Parser.prototype = {
 		};
 	}
 };
-
