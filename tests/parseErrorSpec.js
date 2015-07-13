@@ -1,7 +1,7 @@
 // @todo handle parse errors
 describe('ParseError', function () {
 
-	it("should throw Strings", function () {
+	it("should throw errors..", function () {
 
 		expect(function () {
 
@@ -12,14 +12,10 @@ describe('ParseError', function () {
 
 			Tokenize(" '");
 		}).toThrow(Error("Unexpected string end"));
+
+		expect(function () {
+
+			Tokenize("a[0, 1]");
+		}).toThrow(Error("Expected only 1 Identifier"));
 	});
-
-
-	// it("should throw Strings", function () {
-
-	// 	expect(Tokenize("a[0, 1]")).toThrow({
-	// 		type : "String",
-	// 		value : "  "
-	// 	});
-	// });
 });

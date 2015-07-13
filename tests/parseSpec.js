@@ -34,6 +34,17 @@ describe('Parser', function () {
 			type : "Value",
 			value : 12.24
 		});
+
+		expect(Tokenize("1e3")).toEqual({
+			type : "Value",
+			value : 1e3
+		});
+
+		// @todo(Saar) Test should pass :)
+		// expect(Tokenize(".13")).toEqual({
+		// 	type : "Value",
+		// 	value : 0.13
+		// });
 	});
 
 	it("should parse Identifiers", function () {
