@@ -8,6 +8,11 @@ Javascript AST parser for 'simple' expressions.
 karma start
 ~~~
 
+~~~bash
+npm install -g karma-cli
+npm install
+~~~
+
 ## Usage
 
 ~~~js
