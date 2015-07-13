@@ -48,14 +48,15 @@ fn({foo: 1});
 ## Roadmap
 
 * Performance
-* More opperators
+* More operators
 * Compile functionality
 * Better and more usefull errors
 
 ### Add support for
 
 * foo++
-* foo = 'bar' // Assignment -> do we need this?
+* foo = 'bar' // Assignment -> do we need this? yes! "(tap)="activeTab = 'intern'" then (show)="!activeTab || activeTab === 'intern'"
+* !activeTab || activeTab === 'intern'
 
 ### Todo tests
 
