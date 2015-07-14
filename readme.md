@@ -1,4 +1,4 @@
-# SandwichJS expression parser
+# AST parser
 
 Javascript AST parser for 'simple' expressions.
 
@@ -16,18 +16,9 @@ npm install
 ## Usage
 
 ~~~js
-// var tokens = Tokenize('1 + foo');
-var fn = Compile('1 + foo');
-// fn.tokens
-// fn.tokens.watchers -> i guess only variable names have to be watched
-// Obj.$watch(fn.tokens.watchers, function () { /* Handle changes `fn(Obj)` */ })
-fn({foo: 9}); // => 10
+var tree = Tokenize('1 + foo');
 
-var fn = Sandwich.compile('1 + foo');
-
-// fn.tokens.watchers
-
-fn({foo: 1});
+console.log(tree);
 ~~~
 
 ## Supported expressions
@@ -42,14 +33,21 @@ fn({foo: 1});
 * Functions (foo(), foo('bar'))
 * Nested expressions (a || b && c)
 * Literals (true, false, null)
-* ConditionalExpressions (foo ? 'yes' : 'no')
+* ConditionalExpressions (foo ? true : false)
 * Unary Expression (!foo, --bar)
 
 ## Roadmap
 
 * Performance
 * More operators
-* Compile functionality
+* Compile AST to callable
+
+```js
+var tree = Tokenize('1 + foo');
+var callable = Compile();  
+
+callable({foo: 2}); // Outputs '3'
+```
 * Better and more usefull errors
 
 ### Add support for
@@ -88,27 +86,6 @@ foo['a'].bar.baz
 		}
 	}
 }
-
 ```
 
-### Add support for parseErrors
-
-*
-
-
-
-
-
-
-
-
-parser -> parse string to AST
-compiler -> compiles AST to callable
-
-result -> 
-```js
-var fn = Sandwich.compile('1 + 1');
-fn(); //-> 2
-
-// Deepter api
-```
+### Add parser errors
