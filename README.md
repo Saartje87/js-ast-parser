@@ -2,15 +2,17 @@
 
 Javascript AST parser for 'simple' expressions.
 
-## Run tests
-
-~~~bash
-karma start
-~~~
+## Install
 
 ~~~bash
 npm install -g karma-cli
 npm install
+~~~
+
+## Run tests
+
+~~~bash
+karma start
 ~~~
 
 ## Usage
