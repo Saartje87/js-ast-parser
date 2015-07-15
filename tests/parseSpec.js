@@ -40,11 +40,15 @@ describe('Parser', function () {
 			value : 1e3
 		});
 
-		// @todo(Saar) Test should pass :)
-		// expect(Tokenize(".13")).toEqual({
-		// 	type : "Value",
-		// 	value : 0.13
-		// });
+		expect(Tokenize(".13")).toEqual({
+			type : "Value",
+			value : 0.13
+		});
+
+		expect(Tokenize("-12")).toEqual({
+			type : "Value",
+			value : -12
+		});
 	});
 
 	it("should parse Identifiers", function () {
@@ -713,15 +717,6 @@ describe('Parser', function () {
 					"type": "Identifier",
 					"value": "foo"
 				}
-			}
-		});
-
-		expect(Tokenize("-foo")).toEqual({
-			"type": "UnaryExpression",
-			"operator": "-",
-			"value": {
-				"type": "Identifier",
-				"value": "foo"
 			}
 		});
 

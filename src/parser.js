@@ -143,26 +143,37 @@ Parser.prototype = {
 	 */
 	parseToken: function () {
 
+		// Negative number
+		if( this.is('-') && this.peek(1) !== '-' ) {
+
+			return this.parseNumber();
+		}
+
+		// --, ++ or !
 		if( this.is('+-!') ) {
 
 			return this.parseUnaryExpression();
 		}
 
-		if( this.is('0123456789') ) {
+		// Parse numbers
+		if( this.is('.0123456789') ) {
 
 			return this.parseNumber();
 		}
 
+		// Parse string "foo" or 'foo'
 		if( this.is('"\'') ) {
 
 			return this.parseString();
 		}
 
+		// Start of group
 		if( this.is('(') ) {
 
 			return this.parseGroup();
 		}
 
+		// Start of object
 		if( this.is('{') ) {
 
 			return this.parseObject();
