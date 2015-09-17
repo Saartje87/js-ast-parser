@@ -27,7 +27,7 @@ console.log(tree);
 
 * Numbers (1, 1.23)
 * Strings ('foo')
-* BinaryExpression (+-%/*)
+* BinaryExpression (+-%/\*)
 * LogicalExpression (|| &&)
 * Identifier (foo)
 * Objects (foo.bar, foo['bar'])
