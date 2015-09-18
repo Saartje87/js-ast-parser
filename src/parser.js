@@ -1,5 +1,8 @@
+// TODO(Saar) Array has node.property, Object got node.properties ...
+
 /**
  * Wrapper function that tokenize input
+ * TODO(Saar) Rename to `Rocky.parse('1 + 1')`
  *
  * @return {Tree}
  */
@@ -453,8 +456,8 @@ Parser.prototype = {
 				}
 
 				node = {
-
-					type: previousIsIdentifier ? 'Object' : 'Array',
+					// TODO(Saar) 'Object' is an array accesor
+					type: previousIsIdentifier ? 'Object' : 'NewArray',
 					property: previousIsIdentifier ? args[0] : args
 				};
 
@@ -601,7 +604,7 @@ Parser.prototype = {
 
 		return {
 
-			type: "Object",
+			type: "NewObject",
 			properties: properties
 		};
 	},

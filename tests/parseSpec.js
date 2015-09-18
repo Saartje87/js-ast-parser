@@ -1,3 +1,8 @@
+// TODO(Saar) 1 + foo()
+// TODO(Saar) foo() + 1
+// TODO(Saar) foo() + bar()
+// TODO(Saar) Parse empty objects {}, []
+
 describe('Parser', function () {
 
 	it("should parse Strings", function () {
@@ -99,57 +104,57 @@ describe('Parser', function () {
 		});
 
 		expect(Tokenize("foo[0]")).toEqual({
-		    type: 'Object',
-		    object: {
-		        type: 'Identifier',
-		        value: 'foo'
-		    },
-		    property: {
-		        type: 'Value',
-		        value: 0
-		    }
+			type: 'Object',
+			object: {
+				type: 'Identifier',
+				value: 'foo'
+			},
+			property: {
+				type: 'Value',
+				value: 0
+			}
 		});
 
 		expect(Tokenize("foo[bar]")).toEqual({
-		    type: 'Object',
-		    object: {
-		        type: 'Identifier',
-		        value: 'foo'
-		    },
-		    property: {
-		        type: 'Identifier',
-		        value: 'bar'
-		    }
+			type: 'Object',
+			object: {
+				type: 'Identifier',
+				value: 'foo'
+			},
+			property: {
+				type: 'Identifier',
+				value: 'bar'
+			}
 		});
 
 		expect(Tokenize("foo['bar']")).toEqual({
-		    type: 'Object',
-		    object: {
-		        type: 'Identifier',
-		        value: 'foo'
-		    },
-		    property: {
-		        type: 'String',
-		        value: 'bar'
-		    }
+			type: 'Object',
+			object: {
+				type: 'Identifier',
+				value: 'foo'
+			},
+			property: {
+				type: 'String',
+				value: 'bar'
+			}
 		});
 
 		expect(Tokenize("foo.bar.baz")).toEqual({
 			type: 'Object',
 			object: {
-			    type: 'Identifier',
-			    value: 'foo'
+				type: 'Identifier',
+				value: 'foo'
 			},
 			property: {
-			    type: 'Object',
-			    object: {
-			        type: 'Identifier',
-			        value: 'bar'
-			    },
-			    property: {
-			        type: 'Identifier',
-			        value: 'baz'
-			    }
+				type: 'Object',
+				object: {
+					type: 'Identifier',
+					value: 'bar'
+				},
+				property: {
+					type: 'Identifier',
+					value: 'baz'
+				}
 			}
 		});
 	});
@@ -214,11 +219,11 @@ describe('Parser', function () {
 		// console.log(JSON.stringify(Tokenize("foo('bar', 2)"), null, "\t"))
 
 		expect(Tokenize("foo()")).toEqual({
-		    type: 'Callable',
-		    callable: {
-		        type: 'Identifier',
-		        value: 'foo'
-		    }
+			type: 'Callable',
+			callable: {
+				type: 'Identifier',
+				value: 'foo'
+			}
 		});
 
 		expect(Tokenize("foo.bar()")).toEqual({
@@ -363,7 +368,7 @@ describe('Parser', function () {
 	it("should parse Arrays", function () {
 
 		expect(Tokenize("[1, 2, 4]")).toEqual({
-			"type": "Array",
+			"type": "NewArray",
 			"property": [
 				{
 					"type": "Value",
@@ -381,7 +386,7 @@ describe('Parser', function () {
 		});
 
 		expect(Tokenize("[1, 2, 4, [8]]")).toEqual({
-			"type": "Array",
+			"type": "NewArray",
 			"property": [
 				{
 					"type": "Value",
@@ -396,7 +401,7 @@ describe('Parser', function () {
 					"value": 4
 				},
 				{
-					"type": "Array",
+					"type": "NewArray",
 					"property": [
 						{
 							"type": "Value",
@@ -498,7 +503,7 @@ describe('Parser', function () {
 	it("should parse Objects", function () {
 
 		expect(Tokenize("{foo: 'bar'}")).toEqual({
-			"type": "Object",
+			"type": "NewObject",
 			"properties": [
 				{
 					"type": "Property",
@@ -515,7 +520,7 @@ describe('Parser', function () {
 		});
 
 		expect(Tokenize("{'foo': 'bar'}")).toEqual({
-			"type": "Object",
+			"type": "NewObject",
 			"properties": [
 				{
 					"type": "Property",
@@ -532,7 +537,7 @@ describe('Parser', function () {
 		});
 
 		expect(Tokenize("{'foo': bar()}")).toEqual({
-			"type": "Object",
+			"type": "NewObject",
 			"properties": [
 				{
 					"type": "Property",
@@ -552,7 +557,7 @@ describe('Parser', function () {
 		});
 
 		expect(Tokenize("{foo: []}")).toEqual({
-			"type": "Object",
+			"type": "NewObject",
 			"properties": [
 				{
 					"type": "Property",
@@ -561,7 +566,7 @@ describe('Parser', function () {
 						"value": "foo"
 					},
 					"value": {
-						"type": "Array",
+						"type": "NewArray",
 						"property": null
 					}
 				}
@@ -569,7 +574,7 @@ describe('Parser', function () {
 		});
 
 		expect(Tokenize("{foo: {bar: 'baz'}}")).toEqual({
-			"type": "Object",
+			"type": "NewObject",
 			"properties": [
 				{
 					"type": "Property",
@@ -578,7 +583,7 @@ describe('Parser', function () {
 						"value": "foo"
 					},
 					"value": {
-						"type": "Object",
+						"type": "NewObject",
 						"properties": [
 							{
 								"type": "Property",
@@ -668,7 +673,7 @@ describe('Parser', function () {
 		});
 
 		expect(Tokenize("{foo: true ? 'yes' : 'no'}")).toEqual({
-			"type": "Object",
+			"type": "NewObject",
 			"properties": [
 				{
 					"type": "Property",
@@ -723,6 +728,15 @@ describe('Parser', function () {
 		expect(Tokenize("--foo")).toEqual({
 			"type": "UnaryExpression",
 			"operator": "--",
+			"value": {
+				"type": "Identifier",
+				"value": "foo"
+			}
+		});
+
+		expect(Tokenize("++foo")).toEqual({
+			"type": "UnaryExpression",
+			"operator": "++",
 			"value": {
 				"type": "Identifier",
 				"value": "foo"
