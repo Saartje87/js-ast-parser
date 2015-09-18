@@ -17,5 +17,15 @@ describe('ParseError', function () {
 
 			Tokenize("a[0, 1]");
 		}).toThrow(Error("Expected only 1 Identifier"));
+
+		expect(function () {
+
+			Tokenize("1 - ");
+		}).toThrow(Error("Unexpected -"));
+
+		// expect(function () {
+		//
+		// 	Tokenize("'1' +");
+		// }).toThrow(Error("Unexpected +"));
 	});
 });

@@ -50,7 +50,7 @@ Parser.prototype = {
 
 		this.read();
 
-		// Unexpcted end when this.index !== this.length
+		// Unexpected end when this.index !== this.length
 
 		return this.parseExpression();
 	},
@@ -216,7 +216,7 @@ Parser.prototype = {
 			this.skip(1);
 		}
 
-		this.read(true);
+		this.moveon();
 
 		if( !match ) {
 
@@ -237,11 +237,6 @@ Parser.prototype = {
 	 */
 	read: function ( skipWhitespaceOnly ) {
 
-		if( skipWhitespaceOnly && this.chr !== ' ' ) {
-
-			return true;
-		}
-
 		this.index += 1;
 
 		if( this.index > this.length ) {
@@ -252,6 +247,14 @@ Parser.prototype = {
 		this.chr = this.text[this.index];
 
 		return true;
+	},
+
+	/**
+	 * Skip whitespaces tabz newlines
+	 */
+	 moveon: function () {
+
+		while( this.is(" \t\n") && !this.read() ) {}
 	},
 
 	/**
@@ -325,7 +328,7 @@ Parser.prototype = {
 
 		// Skip qoute
 		this.read();
-		this.read(true);
+		this.moveon();
 
 		return {
 
@@ -351,7 +354,12 @@ Parser.prototype = {
 			value += this.chr;
 		}
 
-		this.read(true);
+		// Validate numer
+		if( !value || value === '-' || value === '+' ) {
+			throw Error('Unexpected '+value);
+		}
+
+		this.moveon();
 
 		return {
 
@@ -404,7 +412,7 @@ Parser.prototype = {
 			value += this.chr;
 		}
 
-		this.read(true);
+		this.moveon();
 
 		return {
 
@@ -483,7 +491,7 @@ Parser.prototype = {
 			}
 		}
 
-		this.read(true);
+		this.moveon();
 
 		return node;
 	},
@@ -496,13 +504,13 @@ Parser.prototype = {
 		var node,
 			args = [];
 
-		this.read(true);
+		this.moveon();
 
 		while( node = this.parseExpression() ) {
 
 			args.push(node);
 
-			this.read(true);
+			this.moveon();
 
 			if( this.is(')]') ) {
 
@@ -515,7 +523,7 @@ Parser.prototype = {
 			}
 
 			this.read();
-			this.read(true);
+			this.moveon();
 
 			if( this.is(')]') ) {
 
@@ -523,7 +531,7 @@ Parser.prototype = {
 			}
 		}
 
-		this.read(true);
+		this.moveon();
 
 		if( this.chr !== ')' && this.chr !== ']' ) {
 
@@ -552,7 +560,7 @@ Parser.prototype = {
 		}
 
 		this.read();
-		this.read(true);
+		this.moveon();
 
 		return {
 
@@ -569,7 +577,7 @@ Parser.prototype = {
 		var node,
 			properties = [];
 
-		this.read(true);
+		this.moveon();
 
 		while( this.read() ) {
 
@@ -621,16 +629,16 @@ Parser.prototype = {
 		// Force `Identifier`
 		key.type = 'Identifier';
 
-		this.read(true);
+		this.moveon();
 
 		if( this.chr !== ':' ) {
 
 			throw Error("Expected `:`");
 		}
 
-		this.read(true);
+		this.moveon();
 		this.read();
-		this.read(true);
+		this.moveon();
 
 		value = this.parseExpression();
 
@@ -656,7 +664,7 @@ Parser.prototype = {
 		}
 
 		this.read();
-		this.read(true);
+		this.moveon();
 
 		consequent = this.parseExpression();
 
@@ -666,7 +674,7 @@ Parser.prototype = {
 		}
 
 		this.read();
-		this.read(true);
+		this.moveon();
 
 		alternate = this.parseExpression();
 
@@ -697,6 +705,10 @@ Parser.prototype = {
 			value += this.chr;
 
 			this.read();
+		}
+
+		if( !this.peek() ) {
+			throw Error('Expected end');
 		}
 
 		return {
