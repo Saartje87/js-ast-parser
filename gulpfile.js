@@ -1,45 +1,88 @@
-var gulp = require('gulp');
-var karma = require('karma').server;
-var concat = require('gulp-concat');
-var es6ModuleTranspiler = require("gulp-es6-module-transpiler");
-var browserify = require('gulp-browserify');
-var browserify = require('browserify');
-var source = require('vinyl-source-stream')
+var gulp = require('gulp'),
+	watch = require('gulp-watch'),
+	sass = require('gulp-sass'),
+	sourcemaps = require('gulp-sourcemaps'),
+	concat = require('gulp-concat'),
+	browserify = require("browserify"),
+	babelify = require("babelify"),
+	source = require('vinyl-source-stream'),
+	buffer = require('vinyl-buffer'),
+	uglify = require('gulp-uglify'),
+	browserSync = require('browser-sync');
+	reload = browserSync.reload,
+	notify = require('gulp-notify'),
+	karma = require('karma').server;
 
-var paths = ['src/**/*.js']
+var project = {
+
+	name: 'SandwichJS'
+};
+
+gulp.task('default', ['build-js']);
 
 /**
- * Run test and watches for changes
+ * Watchers
  */
-gulp.task('test', function (done) {
-  karma.start({
-    configFile: __dirname + '/karma.conf.js',
-    singleRun: false
-  }, done);
+gulp.task('watch', ['browser-sync', 'build-js' /*,'test-js'*/], function () {
+
+	gulp.watch('src/**/*.js', ['build-js']);
+	gulp.watch(['tests/**/*.js', 'dist/**/*.js'], ['test-js']);
+	gulp.watch('sass/**/*.scss', ['build-sass']);
 });
 
-gulp.task('scripts', function () {
+/**
+ * Build js
+ */
+gulp.task('build-js', function () {
 
-	var bundleStream = browserify('./src/sandwich.js').bundle();
-
-	bundleStream
-		.pipe(source('sandwich.js'))
-		.pipe(gulp.dest('./dist'))
-
-	/*gulp.src(paths)
-		.pipe(es6ModuleTranspiler({
-
-			type: 'cjs'
+	browserify({ debug: true })
+		.transform(babelify.configure({
+			optional: ['protoToAssign']
 		}))
-		// .pipe(concat('pbjs.js'))
-		.pipe(gulp.dest('./tmp'));*/
-
-	/*gulp.src(['./src/main.js'])
-		.pipe(browserify({
-          insertGlobals : true,
-          debug : true
-        }))
-        .pipe(gulp.dest('./dist'));*/
+		.require('./src/index.js', { entry: true })
+		.bundle()
+		.on("error", function (err) { console.log("Error : " + err.message); })
+		.pipe(source('observable.js'))
+		.pipe(buffer())
+		.pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
+		// .pipe(uglify())
+		.pipe(sourcemaps.write('./')) // writes .map file
+		.pipe(gulp.dest('dist/'))
+		.pipe(reload({stream:true})); // @todo needed?
 });
 
-gulp.task('default', ['scripts']);
+/**
+ * Mhh karma could proberly be better runned from the command line, much better performance
+ */
+gulp.task('test-js', function () {
+
+	karma.start({
+
+		configFile: __dirname + '/karma.conf.js',
+		singleRun: true
+	}, function ( result ) {
+
+		gulp.src('./src/index.js')
+			.pipe(notify({
+
+				title: (result) ? 'Tests failed!' : 'Tests passed',
+				message: project.name,
+				icon: void 0,
+				sound: (result) ? 'Basso' : 'Pop',
+				wait: false
+			}));
+	});
+});
+
+/**
+ *
+ */
+gulp.task('browser-sync', function() {
+    browserSync({
+        server: {
+            baseDir: './',
+            directory: true
+        },
+        files: ['dist/**/*.js', '**/*.html']
+    });
+});
