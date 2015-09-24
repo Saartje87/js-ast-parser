@@ -176,6 +176,27 @@ describe('Parser', function () {
 			}
 		});
 
+		expect(Tokenize("12 + 34 - 3")).toEqual({
+			"type": "BinaryExpression",
+			"operator": "-",
+			"left": {
+				"type": "BinaryExpression",
+				"operator": "+",
+				"left": {
+					"type": "Value",
+					"value": 12
+				},
+				"right": {
+					"type": "Value",
+					"value": 34
+				}
+			},
+			"right": {
+				"type": "Value",
+				"value": 3
+			}
+		});
+
 		expect(Tokenize("4 || 5")).toEqual({
 			"type": "LogicalExpression",
 			"operator": "||",

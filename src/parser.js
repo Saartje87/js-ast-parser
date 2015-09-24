@@ -62,6 +62,7 @@ Parser.prototype = {
 
 		var left = this.parseToken(),
 			operator = this.parseOperator(),
+			_operator,
 			right,
 			node,
 			stack,
@@ -91,10 +92,10 @@ Parser.prototype = {
 			while( (stack.length > 2) && (operator.precedence <= stack[stack.length - 2].precedence) ) {
 
 				right = stack.pop();
-				operator = stack.pop();
+				_operator = stack.pop();
 				left = stack.pop();
 
-				node = this.createBinaryExpression(operator.value, left, right);
+				node = this.createBinaryExpression(_operator.value, left, right);
 
 				stack.push(node);
 			}
