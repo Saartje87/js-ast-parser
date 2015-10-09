@@ -58,6 +58,8 @@ callable({foo: 2}); // Outputs '3'
 * foo--
 * foo = 'bar' // Assignment -> do we need this? yes! "(tap)="activeTab = 'intern'" then (show)="!activeTab || activeTab === 'intern'"
 * !activeTab || activeTab === 'intern'
+* !foo || bar
+* foo.bar.baz['a']['b']
 
 ### Todo tests
 
