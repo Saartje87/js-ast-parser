@@ -52,8 +52,10 @@ function paths ( node, list ) {
 		case 'Value':
 		case 'NewArray':
 		case 'Group':
+		case 'Literal':
 			break;
 		case 'Identifier':
+		case 'UnaryExpression':
 			list.push(node.value);
 			break;
 		case 'ConditionalExpression':
