@@ -3,18 +3,82 @@
 function Compile ( tree ) {
 
 	if( !tree ) {
-		return
-	};
+		return;
+	}
 
-	let body = 'return ' + compile(tree);
+	// let ctx = compile(tree);
+	// let body = 'return ' + tree.body
 
 	// foo.bar + 2
 	// ctx.body -> function body 'ctx.foo.bar + 2'
 	// ctx.paths = ['foo.bar']
 
-	console.log(body);
+	var links = [];
 
-	return new Function('context', body);
+	paths(tree, links);
+
+	var ctx = {
+		/* jshint evil:true */
+		body: new Function('context', 'return ' + compile(tree)),
+		/* jshint evil:false */
+		paths: links
+	};
+
+	// console.log(paths(tree));
+
+	// console.log(ctx.body);
+
+	return ctx;
+}
+
+window.paths = paths;
+function objectPath ( node ) {
+	var path = node.object.value;
+
+	if( node.property.type === 'Object' ) {
+		return path+'.'+objectPath(node.property);
+	} else if ( node.property.type === 'Identifier' ) {
+		return path+'.'+node.property.value;
+	}
+
+	return path;
+}
+function paths ( node, list ) {
+
+	var value;
+
+	switch (node.type) {
+		case 'String':
+		case 'Value':
+		case 'NewArray':
+			break;
+		case 'Identifier':
+			list.push(node.value);
+			break;
+		case 'ConditionalExpression':
+			paths(node.test, list);
+			paths(node.consequent, list);
+			paths(node.alternate, list);
+			break;
+		case 'BinaryExpression':
+		case 'LogicalExpression':
+			paths(node.left, list);
+			paths(node.right, list);
+			break;
+		case 'Callable':
+			paths(node.callable, list);
+			(node.args || []).forEach(function (arg) {
+				paths(arg, list);
+			});
+			break;
+		case 'Object':
+			list.push(objectPath(node));
+			break;
+
+		default:
+			// console.warn(node);
+			throw 'Not supported ' + node.type;
+	}
 }
 
 function compile ( node, prefix ) {
@@ -38,10 +102,13 @@ function compile ( node, prefix ) {
 			value = compile(node.left) + node.operator + compile(node.right);
 			break;
 		case 'Identifier':
+			if( prefix && node.value === 'this' ) prefix = false;
 			value = (prefix ? 'context.' : '') + node.value;
 			break;
 		case 'Object':
-			value = compile(node.object, prefix) + '.' + compile(node.property, false);
+			var propertyType = node.property.type;
+			value = compile(node.object, prefix) +
+				(propertyType === 'Object' || propertyType === 'Identifier' ? '.'+compile(node.property, false) : '['+compile(node.property, false)+']');
 			break;
 		case 'UnaryExpression':
 			value = node.operator + compile(node.value);
@@ -66,6 +133,9 @@ function compile ( node, prefix ) {
 			break;
 		case 'Group':
 			value = '('+compile(node.value)+')';
+			break;
+		case 'ConditionalExpression':
+			value = compile(node.test)+'?'+compile(node.consequent)+':'+compile(node.alternate);
 			break;
 
 		default:
