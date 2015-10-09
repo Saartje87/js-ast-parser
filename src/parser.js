@@ -75,6 +75,11 @@ Parser.prototype = {
 				return this.parseConditionalExpression(left);
 			}
 
+			if( this.chr === '=' ) {
+
+				return this.parseAssignmentExpression(left);
+			}
+
 			return left;
 		}
 
@@ -685,6 +690,21 @@ Parser.prototype = {
 			test: left,
 			consequent: consequent,
 			alternate: alternate
+		};
+	},
+
+	/**
+	 *
+	 */
+	parseAssignmentExpression: function ( left ) {
+
+		this.read();
+		this.moveon();
+
+		return {
+			type: 'AssignmentExpression',
+			left: left,
+			right: this.parseExpression()
 		};
 	},
 

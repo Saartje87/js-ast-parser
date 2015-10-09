@@ -51,6 +51,7 @@ function paths ( node, list ) {
 		case 'String':
 		case 'Value':
 		case 'NewArray':
+		case 'Group':
 			break;
 		case 'Identifier':
 			list.push(node.value);
@@ -62,6 +63,7 @@ function paths ( node, list ) {
 			break;
 		case 'BinaryExpression':
 		case 'LogicalExpression':
+		case 'AssignmentExpression':
 			paths(node.left, list);
 			paths(node.right, list);
 			break;
@@ -136,6 +138,10 @@ function compile ( node, prefix ) {
 			break;
 		case 'ConditionalExpression':
 			value = compile(node.test)+'?'+compile(node.consequent)+':'+compile(node.alternate);
+			break;
+		case 'AssignmentExpression':
+			// Using set method for Rocky.Object
+			value = 'context.set(\''+compile(node.left, false)+'\', '+compile(node.right)+')';
 			break;
 
 		default:

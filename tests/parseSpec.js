@@ -764,4 +764,38 @@ describe('Parser', function () {
 			}
 		});
 	});
+
+	it('should parse AssignmentExpression', function () {
+
+		expect(Tokenize("foo = 'bar'")).toEqual({
+			"type": "AssignmentExpression",
+			"left": {
+				"type": "Identifier",
+				"value": "foo"
+			},
+			"right": {
+				"type": "String",
+				"value": "bar"
+			}
+		});
+
+		expect(Tokenize("foo.baz = 'bar'")).toEqual({
+			"type": "AssignmentExpression",
+			"left": {
+				type: "Object",
+				object: {
+					"type": "Identifier",
+					"value": "foo"
+				},
+				property: {
+					"type": "Identifier",
+					"value": "baz"
+				}
+			},
+			"right": {
+				"type": "String",
+				"value": "bar"
+			}
+		});
+	});
 });

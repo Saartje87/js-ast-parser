@@ -27,7 +27,7 @@ console.log(tree);
 
 * Numbers (1, 1.23)
 * Strings ('foo')
-* BinaryExpression (+-%/*)
+* BinaryExpression (+-%/\*)
 * LogicalExpression (|| &&)
 * Identifier (foo)
 * Objects (foo.bar, foo['bar'])
@@ -37,12 +37,14 @@ console.log(tree);
 * Literals (true, false, null)
 * ConditionalExpressions (foo ? true : false)
 * Unary Expression (!foo, --bar)
+* Assignment Expression (foo = 'bar')
 
 ## Roadmap
 
 * Performance
 * More operators
 * Compile AST to callable
+* Throw error when string could not be parsed
 
 ~~~js
 var tree = Tokenize('1 + foo');
@@ -56,8 +58,9 @@ callable({foo: 2}); // Outputs '3'
 
 * foo++
 * foo--
-* foo = 'bar' // Assignment -> do we need this? yes! "(tap)="activeTab = 'intern'" then (show)="!activeTab || activeTab === 'intern'"
 * !activeTab || activeTab === 'intern'
+* !foo || bar
+* foo.bar.baz['a']['b']
 
 ### Todo tests
 
