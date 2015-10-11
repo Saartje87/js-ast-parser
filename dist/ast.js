@@ -336,13 +336,23 @@ var Parser = (function () {
 		key: 'parseCallable',
 		value: function parseCallable(node) {
 
+			var args = [];
+
+			// TODO(Saar) Code cleanup
 			this.read();
 			this.moveon();
+
+			if (this.current === ')') {
+				this.read();
+				this.moveon();
+			} else {
+				args = this.parseCallableArguments();
+			}
 
 			return {
 				type: 'Callable',
 				callable: node,
-				args: this.current === ')' ? [] : this.parseCallableArguments()
+				args: args
 			};
 		}
 	}, {
@@ -360,10 +370,10 @@ var Parser = (function () {
 					this.read();
 					this.moveon();
 				}
-
-				if (this.is(')')) {
-					break;
-				}
+				// End of callable args
+				else if (this.is(')')) {
+						break;
+					}
 			}
 
 			if (!this.is(')')) {
@@ -406,7 +416,7 @@ var Parser = (function () {
 		key: 'parseMemberExpression',
 		value: function parseMemberExpression() {
 			return {
-				type: 'MemberExpression',
+				type: 'Member',
 				computed: false, // True when shoud use []
 				object: {},
 				property: {}

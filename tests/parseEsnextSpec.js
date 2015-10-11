@@ -109,5 +109,32 @@ describe('Parser', function () {
 				}
 			]
 		});
+
+		expect(parse('foo(bar("baz"), 2)')).toEqual({
+			type: 'Callable',
+			callable: {
+				type: 'Identifier',
+				value: 'foo'
+			},
+			args: [
+				{
+					type: 'Callable',
+					callable: {
+						type: 'Identifier',
+						value: 'bar'
+					},
+					args: [
+						{
+							type: 'String',
+							value: 'baz'
+						}
+					]
+				},
+				{
+					type: 'Number',
+					value: 2
+				}
+			]
+		});
 	});
 });

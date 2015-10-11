@@ -129,13 +129,23 @@ class Parser {
 	parseBinaryExpression () {}
 	parseCallable ( node ) {
 
+		let args = [];
+
+		// TODO(Saar) Code cleanup
 		this.read();
 		this.moveon();
+
+		if( this.current === ')' ) {
+			this.read();
+			this.moveon();
+		} else {
+			args = this.parseCallableArguments();
+		}
 
 		return {
 			type: 'Callable',
 			callable: node,
-			args: this.current === ')' ? [] : this.parseCallableArguments()
+			args: args
 		};
 	}
 	parseCallableArguments () {
@@ -151,8 +161,8 @@ class Parser {
 				this.read();
 				this.moveon();
 			}
-
-			if( this.is(')') ) {
+			// End of callable args
+			else if( this.is(')') ) {
 				break;
 			}
 		}
@@ -190,7 +200,7 @@ class Parser {
 	parseNested () {}
 	parseMemberExpression () {
 		return {
-			type: 'MemberExpression',
+			type: 'Member',
 			computed: false, // True when shoud use []
 			object: {},
 			property: {}
