@@ -16,7 +16,8 @@ module.exports = function(config) {
 	// list of files / patterns to load in the browser
 	files: [
 	  'src/**/parser.js',
-	  'tests/**/*Spec.js'
+	  'dist/ast.js',
+	  'tests/**/*EsnextSpec.js'
 	],
 
 

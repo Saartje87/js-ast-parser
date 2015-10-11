@@ -1,4 +1,5 @@
 # AST parser
+# Rocky - Exprast (ExpressionAST)
 
 Javascript AST parser for 'simple' expressions.
 
@@ -25,14 +26,14 @@ console.log(tree);
 
 ## Supported expressions
 
-* Numbers (1, 1.23)
+* Numbers (1, 1.23, 1e3, -200)
 * Strings ('foo')
 * BinaryExpression (+-%/\*)
 * LogicalExpression (|| &&)
 * Identifier (foo)
 * Objects (foo.bar, foo['bar'])
 * Arrays (foo[0])
-* Functions (foo(), foo('bar'))
+* Functions/Callable (foo(), foo('bar'))
 * Nested expressions (a || b && c)
 * Literals (true, false, null)
 * ConditionalExpressions (foo ? true : false)

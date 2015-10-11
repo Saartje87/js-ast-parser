@@ -36,13 +36,11 @@ gulp.task('watch', ['browser-sync', 'build-js' /*,'test-js'*/], function () {
 gulp.task('build-js', function () {
 
 	browserify({ debug: true })
-		.transform(babelify.configure({
-			optional: ['protoToAssign']
-		}))
+		.transform(babelify.configure())
 		.require('./src/index.js', { entry: true })
 		.bundle()
 		.on("error", function (err) { console.log("Error : " + err.message); })
-		.pipe(source('observable.js'))
+		.pipe(source('ast.js'))
 		.pipe(buffer())
 		.pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
 		// .pipe(uglify())
@@ -78,11 +76,11 @@ gulp.task('test-js', function () {
  *
  */
 gulp.task('browser-sync', function() {
-    browserSync({
-        server: {
-            baseDir: './',
-            directory: true
-        },
-        files: ['dist/**/*.js', '**/*.html']
-    });
+	browserSync({
+		server: {
+			baseDir: './',
+			directory: true
+		},
+		files: ['dist/**/*.js', '**/*.html']
+	});
 });
