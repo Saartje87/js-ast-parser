@@ -205,16 +205,6 @@ var Parser = (function () {
 	_createClass(Parser, [{
 		key: 'parse',
 
-		// constructor (expression) {
-		// 	this.text = expression;
-		// 	this.length = expression.length;
-		//
-		// 	// Parse index
-		// 	this.index = -1;
-		// 	// Current character
-		// 	this.current = '';
-		// }
-
 		/**
    * Parse given expression
    *
@@ -232,7 +222,7 @@ var Parser = (function () {
 
 			this.read();
 
-			return this.parseToken();
+			return this.parseExpression();
 		}
 
 		// -- Private method -- //
@@ -298,7 +288,6 @@ var Parser = (function () {
 	}, {
 		key: 'parseToken',
 		value: function parseToken() {
-
 			if (!this.current) {
 				throw new ParseError('Unexpected end');
 			}
@@ -311,13 +300,44 @@ var Parser = (function () {
 				return this.parseString();
 			}
 
+			if (this.is('(')) {
+				return this.parseNested();
+			}
+
+			if (this.is('!-+')) {
+				return this.parseUnaryExpression();
+			}
+
 			if (this.isIdentifierStart()) {
 				return this.parseVariable();
 			}
 
-			throw 'Could not parse';
+			throw new ParseError('Could not parse');
+		}
+	}, {
+		key: 'parseExpression',
+		value: function parseExpression() {
+			var left = this.parseToken();
+			var operator = this.parseOperator();
 
-			// return this.parseVariable();
+			if (!this.current) {
+				return left;
+			}
+
+			if (operator) {
+				return this.parseBinaryExpression(left, operator);
+			}
+
+			if (this.is('?')) {
+				return this.parseConditionalExpression(left);
+			}
+
+			if (this.is('=')) {
+				return this.parseAssignmentExpression(left);
+			}
+
+			return left;
+			// throw new ParseError('Errororrr '+this.current);
 		}
 
 		/**
@@ -328,10 +348,70 @@ var Parser = (function () {
 		value: function parseArray() {}
 	}, {
 		key: 'parseAssignmentExpression',
-		value: function parseAssignmentExpression() {}
+		value: function parseAssignmentExpression(left) {
+
+			this.read();
+			this.moveon();
+
+			return {
+				type: 'Assignment',
+				left: left,
+				right: this.parseExpression()
+			};
+		}
 	}, {
 		key: 'parseBinaryExpression',
-		value: function parseBinaryExpression() {}
+		value: function parseBinaryExpression(_left, _operator) {
+			// function argument is like a var..
+			var left = _left;
+			var operator = _operator;
+
+			if (!operator) {
+				throw new ParseError('Euh errorrrr');
+			}
+
+			var right = this.parseToken();
+
+			if (!right) {
+				throw new ParseError('Invalid token after ' + operator.value);
+			}
+
+			var stack = [left, operator, right];
+
+			/* jshint boss: true */
+			for (var _operator2 = undefined, _node = undefined; _operator2 = this.parseOperator();) {
+
+				while (stack.length > 2 && _operator2.precedence <= stack[stack.length - 2].precedence) {
+
+					var _right = stack.pop();
+					var _operator3 = stack.pop();
+					var _left2 = stack.pop();
+
+					_node = this.createOperatorExpression(_operator3.value, _left2, _right);
+
+					stack.push(_node);
+				}
+
+				_node = this.parseToken();
+
+				if (!_node) {
+					throw new ParseError('Invalid token after ' + _operator2.value);
+				}
+
+				stack.push(_operator2, _node);
+			}
+
+			var i = stack.length - 1;
+			var node = stack[i];
+
+			while (i > 1) {
+
+				node = this.createOperatorExpression(stack[i - 1].value, stack[i - 2], node);
+				i -= 2;
+			}
+
+			return node;
+		}
 	}, {
 		key: 'parseCallable',
 		value: function parseCallable(node) {
@@ -404,14 +484,29 @@ var Parser = (function () {
 				value: value
 			};
 		}
-	}, {
-		key: 'parseLogicalExpression',
-		value: function parseLogicalExpression() {}
 
+		// parseLogicalExpression () {}
 		// Or group?
 	}, {
 		key: 'parseNested',
-		value: function parseNested() {}
+		value: function parseNested() {
+			this.read();
+			this.moveon();
+
+			var node = this.parseExpression();
+
+			if (!this.is(')')) {
+				throw new ParseError('Missing `)`');
+			}
+
+			this.read();
+			this.moveon();
+
+			return {
+				type: 'Nested',
+				value: node
+			};
+		}
 	}, {
 		key: 'parseMemberExpression',
 		value: function parseMemberExpression() {
@@ -420,6 +515,36 @@ var Parser = (function () {
 				computed: false, // True when shoud use []
 				object: {},
 				property: {}
+			};
+		}
+	}, {
+		key: 'parseOperator',
+		value: function parseOperator() {
+			var one = this.current,
+			    two = one + this.peek(1),
+			    three = two + this.peek(2),
+			    value;
+
+			if (BINARY_OPERATORS.hasOwnProperty(three)) {
+				value = three;
+				this.skip(3);
+			} else if (BINARY_OPERATORS.hasOwnProperty(two)) {
+				value = two;
+				this.skip(2);
+			} else if (BINARY_OPERATORS.hasOwnProperty(one)) {
+				value = one;
+				this.skip(1);
+			}
+
+			this.moveon();
+
+			if (!value) {
+				return;
+			}
+
+			return {
+				value: value,
+				precedence: BINARY_OPERATORS[value]
 			};
 		}
 
@@ -490,7 +615,27 @@ var Parser = (function () {
 		}
 	}, {
 		key: 'parseUnaryExpression',
-		value: function parseUnaryExpression() {}
+		value: function parseUnaryExpression() {
+			var value = this.current;
+
+			this.read();
+
+			// -- ++
+			if (this.is('-+')) {
+				value += this.current;
+				this.read();
+			}
+
+			if (!this.peek(1)) {
+				throw new ParseError();
+			}
+
+			return {
+				type: 'Unary',
+				operator: value,
+				value: this.parseExpression()
+			};
+		}
 	}, {
 		key: 'parseVariable',
 		value: function parseVariable() {
@@ -529,6 +674,18 @@ var Parser = (function () {
 			chrCode >= 65 && chrCode <= 90 || // A...Z
 			chrCode >= 97 && chrCode <= 122 || // a...z
 			chrCode >= 48 && chrCode <= 57; // 0...9
+		}
+	}, {
+		key: 'createOperatorExpression',
+		value: function createOperatorExpression(operator, left, right) {
+			var type = operator === '||' || operator === '&&' ? 'Logical' : 'Binary';
+
+			return {
+				type: type,
+				operator: operator,
+				left: left,
+				right: right
+			};
 		}
 	}]);
 

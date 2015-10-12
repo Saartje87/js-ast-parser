@@ -258,7 +258,7 @@ Parser.prototype = {
 	/**
 	 * Skip whitespaces tabz newlines
 	 */
-	 moveon: function () {
+	moveon: function () {
 
 		while( this.is(" \t\n") && !this.read() ) {}
 	},

@@ -21,16 +21,6 @@ const IS_NUMBER = '0123456789.e';
 
 class Parser {
 
-	// constructor (expression) {
-	// 	this.text = expression;
-	// 	this.length = expression.length;
-	//
-	// 	// Parse index
-	// 	this.index = -1;
-	// 	// Current character
-	// 	this.current = '';
-	// }
-
 	/**
 	 * Parse given expression
 	 *
@@ -48,7 +38,7 @@ class Parser {
 
 		this.read();
 
-		return this.parseToken();
+		return this.parseExpression();
 	}
 
 	// -- Private method -- //
@@ -100,7 +90,6 @@ class Parser {
 
 	// Parsers
 	parseToken () {
-
 		if( !this.current ) {
 			throw new ParseError('Unexpected end');
 		}
@@ -113,20 +102,109 @@ class Parser {
 			return this.parseString();
 		}
 
+		if( this.is('(') ) {
+			return this.parseNested();
+		}
+
+		if( this.is('!-+') ) {
+			return this.parseUnaryExpression();
+		}
+
 		if( this.isIdentifierStart() ) {
 			return this.parseVariable();
 		}
 
-		throw 'Could not parse';
+		throw new ParseError('Could not parse');
+	}
+	parseExpression () {
+		let left = this.parseToken();
+		let operator = this.parseOperator();
 
-		// return this.parseVariable();
+		if( !this.current ) {
+			return left;
+		}
+
+		if( operator ) {
+			return this.parseBinaryExpression(left, operator);
+		}
+
+		if( this.is('?') ) {
+			return this.parseConditionalExpression(left);
+		}
+
+		if( this.is('=') ) {
+			return this.parseAssignmentExpression(left);
+		}
+
+		return left;
+		// throw new ParseError('Errororrr '+this.current);
 	}
 	/**
 	 *
 	 */
 	parseArray () {}
-	parseAssignmentExpression () {}
-	parseBinaryExpression () {}
+	parseAssignmentExpression ( left ) {
+
+		this.read();
+		this.moveon();
+
+		return {
+			type: 'Assignment',
+			left: left,
+			right: this.parseExpression()
+		};
+	}
+	parseBinaryExpression ( _left, _operator ) {
+		// function argument is like a var..
+		let left = _left;
+		let operator = _operator;
+
+		if( !operator ) {
+			throw new ParseError('Euh errorrrr');
+		}
+
+		let right = this.parseToken();
+
+		if( !right ) {
+			throw new ParseError('Invalid token after '+operator.value);
+		}
+
+		let stack = [left, operator, right];
+
+		/* jshint boss: true */
+		for ( let operator, node; operator = this.parseOperator(); ) {
+
+			while ( stack.length > 2 && operator.precedence <= stack[stack.length - 2].precedence ) {
+
+				let right = stack.pop();
+				let operator = stack.pop();
+				let left = stack.pop();
+
+				node = this.createOperatorExpression(operator.value, left, right);
+
+				stack.push(node);
+			}
+
+			node = this.parseToken();
+
+			if( !node ) {
+				throw new ParseError('Invalid token after '+operator.value);
+			}
+
+			stack.push(operator, node);
+		}
+
+		let i = stack.length - 1;
+		let node = stack[i];
+
+		while ( i > 1 ) {
+
+			node = this.createOperatorExpression(stack[i - 1].value, stack[i - 2], node);
+			i -= 2;
+		}
+
+		return node;
+	}
 	parseCallable ( node ) {
 
 		let args = [];
@@ -195,15 +273,62 @@ class Parser {
 				value: value
 			};
 	}
-	parseLogicalExpression () {}
+	// parseLogicalExpression () {}
 	// Or group?
-	parseNested () {}
+	parseNested () {
+		this.read();
+		this.moveon();
+
+		let node = this.parseExpression();
+
+		if( !this.is(')') ) {
+			throw new ParseError('Missing `)`');
+		}
+
+		this.read();
+		this.moveon();
+
+		return {
+			type: 'Nested',
+			value: node
+		};
+	}
 	parseMemberExpression () {
 		return {
 			type: 'Member',
 			computed: false, // True when shoud use []
 			object: {},
 			property: {}
+		};
+	}
+	parseOperator () {
+		var one = this.current,
+			two = one+this.peek(1),
+			three = two+this.peek(2),
+			value;
+
+		if( BINARY_OPERATORS.hasOwnProperty(three) ) {
+			value = three;
+			this.skip(3);
+		}
+		else if ( BINARY_OPERATORS.hasOwnProperty(two) ) {
+			value = two;
+			this.skip(2);
+		}
+		else if ( BINARY_OPERATORS.hasOwnProperty(one) ) {
+			value = one;
+			this.skip(1);
+		}
+
+		this.moveon();
+
+		if( !value ) {
+			return;
+		}
+
+		return {
+			value: value,
+			precedence: BINARY_OPERATORS[value]
 		};
 	}
 	/**
@@ -264,7 +389,27 @@ class Parser {
 			value: value
 		};
 	}
-	parseUnaryExpression () {}
+	parseUnaryExpression () {
+		let value = this.current;
+
+		this.read();
+
+		// -- ++
+		if( this.is('-+') ) {
+			value += this.current;
+			this.read();
+		}
+
+		if( !this.peek(1) ) {
+			throw new ParseError();
+		}
+
+		return {
+			type: 'Unary',
+			operator: value,
+			value: this.parseExpression()
+		};
+	}
 	parseVariable () {
 
 		var node = this.parseIdentifier();
@@ -298,6 +443,17 @@ class Parser {
 			(chrCode >= 65 && chrCode <= 90) || // A...Z
 			(chrCode >= 97 && chrCode <= 122) || // a...z
 			(chrCode >= 48 && chrCode <= 57); // 0...9
+	}
+
+	createOperatorExpression ( operator, left, right ) {
+		let type = (operator === '||' || operator === '&&') ? 'Logical' : 'Binary';
+
+		return {
+			type: type,
+			operator: operator,
+			left: left,
+			right: right
+		};
 	}
 }
 
