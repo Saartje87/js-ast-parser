@@ -156,6 +156,7 @@ class Parser {
 	}
 	parseBinaryExpression ( _left, _operator ) {
 		// function argument is like a var..
+		// TODO(Saar) Dont like this hack..
 		let left = _left;
 		let operator = _operator;
 
@@ -293,12 +294,23 @@ class Parser {
 			value: node
 		};
 	}
-	parseMemberExpression () {
+	parseMemberExpression ( object ) {
+		let computed = !!this.is('[');
+
+		this.read();
+		this.moveon();
+
+		let property = this.parseExpression();
+
+		if( computed ) {
+			this.read();
+		}
+
 		return {
 			type: 'Member',
-			computed: false, // True when shoud use []
-			object: {},
-			property: {}
+			computed: computed,
+			object: object,
+			property: property
 		};
 	}
 	parseOperator () {
@@ -470,4 +482,4 @@ function ParseError( message ) {
 	this.stack = (new Error()).stack;
 }
 
-ParseError.prototype = Error.prototype;
+ParseError.prototype = Object.create(Error.prototype);

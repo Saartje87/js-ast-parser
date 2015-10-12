@@ -1,3 +1,4 @@
+// Identifier should have name attribute!
 describe('Parser', function () {
 
 	var parse = Rocky.parse;
@@ -284,6 +285,73 @@ describe('Parser', function () {
 			value: {
 				type: 'Identifier',
 				value: 'foo'
+			}
+		});
+	});
+
+	it('should parse member expressions', function () {
+
+		expect(parse('foo.bar')).toEqual({
+			type: 'Member',
+			computed: false,
+			object: {
+				type: 'Identifier',
+				value: 'foo'
+			},
+			property: {
+				type: 'Identifier',
+				value: 'bar'
+			}
+		});
+
+		expect(parse('foo.bar.baz')).toEqual({
+			type: 'Member',
+			computed: false,
+			object: {
+				type: 'Identifier',
+				value: 'foo'
+			},
+			property: {
+				type: 'Member',
+				computed: false,
+				object: {
+					type: 'Identifier',
+					value: 'bar'
+				},
+				property: {
+					type: 'Identifier',
+					value: 'baz'
+				}
+			}
+		});
+
+		expect(parse('foo[0]')).toEqual({
+			type: 'Member',
+			computed: true,
+			object: {
+				type: 'Identifier',
+				value: 'foo'
+			},
+			property: {
+				type: 'Number',
+				value: 0
+			}
+		});
+
+		expect(parse('foo[bar()]')).toEqual({
+			type: 'Member',
+			computed: true,
+			object: {
+				type: 'Identifier',
+				value: 'foo'
+			},
+			property: {
+				type: 'Callable',
+				callable: {
+					type: 'Identifier',
+					value: 'bar'
+				},
+				args: []
 			}
 		});
 	});

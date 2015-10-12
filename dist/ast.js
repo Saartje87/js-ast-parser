@@ -363,6 +363,7 @@ var Parser = (function () {
 		key: 'parseBinaryExpression',
 		value: function parseBinaryExpression(_left, _operator) {
 			// function argument is like a var..
+			// TODO(Saar) Dont like this hack..
 			var left = _left;
 			var operator = _operator;
 
@@ -509,12 +510,23 @@ var Parser = (function () {
 		}
 	}, {
 		key: 'parseMemberExpression',
-		value: function parseMemberExpression() {
+		value: function parseMemberExpression(object) {
+			var computed = !!this.is('[');
+
+			this.read();
+			this.moveon();
+
+			var property = this.parseExpression();
+
+			if (computed) {
+				this.read();
+			}
+
 			return {
 				type: 'Member',
-				computed: false, // True when shoud use []
-				object: {},
-				property: {}
+				computed: computed,
+				object: object,
+				property: property
 			};
 		}
 	}, {
@@ -705,7 +717,7 @@ function ParseError(message) {
 	this.stack = new Error().stack;
 }
 
-ParseError.prototype = Error.prototype;
+ParseError.prototype = Object.create(Error.prototype);
 module.exports = exports['default'];
 
 },{}]},{},[2])
