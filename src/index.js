@@ -2,6 +2,6 @@
 
 	let Rocky = context.Rocky = context.Rocky || {};
 
-	Rocky.compile = require('./compile');
+	Rocky.compile = require('./compiler-esnext');
 	Rocky.parse = require('./parser-esnext');
 })(window);
