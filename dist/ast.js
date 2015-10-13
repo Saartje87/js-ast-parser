@@ -1,158 +1,180 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-function Compile(tree) {
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
 
-	if (!tree) {
-		return;
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+exports['default'] = compile;
+
+var Compiler = (function () {
+	function Compiler() {
+		_classCallCheck(this, Compiler);
 	}
 
-	// let ctx = compile(tree);
-	// let body = 'return ' + tree.body
+	_createClass(Compiler, [{
+		key: 'compile',
+		value: function compile(node) {
 
-	// foo.bar + 2
-	// ctx.body -> function body 'ctx.foo.bar + 2'
-	// ctx.paths = ['foo.bar']
+			// console.log('compile()', node);
 
-	var links = [];
+			return {
+				callable: this.precompile(node),
+				bindingPaths: this.findBindings(node)
+			};
+		}
+	}, {
+		key: 'precompile',
+		value: function precompile(node) {
+			var context = {
+				code: 'return ',
+				bindings: []
+			};
 
-	paths(tree, links);
+			this.buffer = '';
 
-	var ctx = {
-		/* jshint evil:true */
-		body: new Function('context', 'return ' + compile(tree)),
-		/* jshint evil:false */
-		paths: links
-	};
+			this.walk(node, context);
 
-	// console.log(paths(tree));
+			console.log(context.code);
+			console.log(context.bindings);
 
-	// console.log(ctx.body);
+			/* jshint evil:true */
+			// return context.code;
+			return new Function('context', context.code);
+		}
+	}, {
+		key: 'walk',
+		value: function walk(node, context) {
+			// console.log('walk()', node);
+			if (typeof this[node.type] !== 'function') {
+				console.log(node);
+				throw new Error(this[node.type]);
+			}
+			this[node.type](node, context);
+		}
+	}, {
+		key: 'Binary',
+		value: function Binary(node, context) {
+			this.walk(node.left, context);
+			context.code += node.operator;
+			this.walk(node.right, context);
+		}
+	}, {
+		key: 'Callable',
+		value: function Callable(node, context) {
+			var _this = this;
 
-	return ctx;
-}
-
-window.paths = paths;
-function objectPath(node) {
-	var path = node.object.value;
-
-	if (node.property.type === 'Object') {
-		return path + '.' + objectPath(node.property);
-	} else if (node.property.type === 'Identifier') {
-		return path + '.' + node.property.value;
-	}
-
-	return path;
-}
-function paths(node, list) {
-
-	var value;
-
-	switch (node.type) {
-		case 'String':
-		case 'Value':
-		case 'NewArray':
-		case 'Group':
-		case 'Literal':
-			break;
-		case 'Identifier':
-		case 'UnaryExpression':
-			list.push(node.value);
-			break;
-		case 'ConditionalExpression':
-			paths(node.test, list);
-			paths(node.consequent, list);
-			paths(node.alternate, list);
-			break;
-		case 'BinaryExpression':
-		case 'LogicalExpression':
-		case 'AssignmentExpression':
-			paths(node.left, list);
-			paths(node.right, list);
-			break;
-		case 'Callable':
-			paths(node.callable, list);
-			(node.args || []).forEach(function (arg) {
-				paths(arg, list);
+			var argsLength = node.args.length - 1;
+			this.walk(node.callable, context);
+			context.code += '(';
+			node.args.forEach(function (node, i) {
+				_this.walk(node, context);
+				context.code += argsLength !== i ? ',' : '';
 			});
-			break;
-		case 'Object':
-			list.push(objectPath(node));
-			break;
+			context.code += ')';
+		}
+	}, {
+		key: 'Conditional',
+		value: function Conditional(node, context) {
+			this.walk(node.test, context);
+			context.code += '?';
+			this.walk(node.consequent, context);
+			context.code += ':';
+			this.walk(node.alternate, context);
+		}
+	}, {
+		key: 'Number',
+		value: function Number(node, context) {
+			context.code += node.raw;
+		}
+	}, {
+		key: 'Nested',
+		value: function Nested(node, context) {
+			context.code += '(';
+			this.walk(node.value, context);
+			context.code += ')';
+		}
+	}, {
+		key: 'String',
+		value: function String(node, context) {
+			context.code += node.raw;
+		}
+	}, {
+		key: 'Logical',
+		value: function Logical(node, context) {
+			this.walk(node.left, context);
+			context.code += node.operator;
+			this.walk(node.right, context);
+		}
+	}, {
+		key: 'Identifier',
+		value: function Identifier(node, context) {
+			context.code += node.value;
 
-		default:
-			// console.warn(node);
-			throw 'Not supported ' + node.type;
-	}
+			if (!this.members) {
+				context.bindings.push(node.value);
+			} else {
+				this.members.push(node.value);
+			}
+		}
+	}, {
+		key: 'Assignment',
+		value: function Assignment(node, context) {
+			this.walk(node.left, context);
+			context.code += '=';
+			this.walk(node.right, context);
+		}
+	}, {
+		key: 'Member',
+		value: function Member(node, context) {
+			var members = this.members;
+			if (!members) {
+				// console.log('Go');
+				this.members = [];
+				context.code += 'context.';
+			}
+			this.walk(node.object, context);
+			if (node.computed) {
+				context.code += '[';
+				this.walk(node.property, context);
+				context.code += ']';
+			} else {
+				context.code += '.';
+				this.walk(node.property, context);
+			}
+			if (!members) {
+				// console.log('End');
+				context.bindings.push(this.members.join('.'));
+				this.members = null;
+			}
+		}
+	}, {
+		key: 'flush',
+		value: function flush() {
+			var buffer = this.buffer;
+
+			this.buffer = '';
+
+			return buffer;
+		}
+	}, {
+		key: 'findBindings',
+		value: function findBindings() {}
+	}]);
+
+	return Compiler;
+})();
+
+function compile(node) {
+	var compiler = new Compiler();
+
+	return compiler.compile(node);
 }
-
-function compile(node, prefix) {
-
-	var value;
-
-	prefix = prefix === undefined ? true : prefix;
-
-	// console.log('ke', node, prefix);
-
-	switch (node.type) {
-		case 'Value':
-		case 'Literal':
-			value = node.value;
-			break;
-		case 'String':
-			value = '"' + node.value + '"';
-			break;
-		case 'BinaryExpression':
-		case 'LogicalExpression':
-			value = compile(node.left) + node.operator + compile(node.right);
-			break;
-		case 'Identifier':
-			if (prefix && node.value === 'this') prefix = false;
-			value = (prefix ? 'context.' : '') + node.value;
-			break;
-		case 'Object':
-			var propertyType = node.property.type;
-			value = compile(node.object, prefix) + (propertyType === 'Object' || propertyType === 'Identifier' ? '.' + compile(node.property, false) : '[' + compile(node.property, false) + ']');
-			break;
-		case 'UnaryExpression':
-			value = node.operator + compile(node.value);
-			break;
-		case 'NewArray':
-			value = '[' + (node.property || []).map(function (node) {
-				return compile(node);
-			}).join(',') + ']';
-			break;
-		case 'NewObject':
-			value = '{' + (node.properties || []).map(function (node) {
-				return compile(node);
-			}).join(',') + '}';
-			break;
-		case 'Property':
-			value = compile(node.key, false) + ': ' + compile(node.value);
-			break;
-		case 'Callable':
-			value = compile(node.callable, prefix) + '(' + (node.args || []).map(function (node) {
-				return compile(node);
-			}).join(',') + ')';
-			break;
-		case 'Group':
-			value = '(' + compile(node.value) + ')';
-			break;
-		case 'ConditionalExpression':
-			value = compile(node.test) + '?' + compile(node.consequent) + ':' + compile(node.alternate);
-			break;
-		case 'AssignmentExpression':
-			// Using set method for Rocky.Object
-			value = 'context.set(\'' + compile(node.left, false) + '\', ' + compile(node.right) + ')';
-			break;
-
-		default:
-			console.warn(node);
-			throw 'Not supported ' + node.type;
-	}
-
-	return value;
-}
+module.exports = exports['default'];
 
 },{}],2:[function(require,module,exports){
 'use strict';
@@ -161,11 +183,11 @@ function compile(node, prefix) {
 
 	var Rocky = context.Rocky = context.Rocky || {};
 
-	Rocky.compile = require('./compile');
+	Rocky.compile = require('./compiler-esnext');
 	Rocky.parse = require('./parser-esnext');
 })(window);
 
-},{"./compile":1,"./parser-esnext":3}],3:[function(require,module,exports){
+},{"./compiler-esnext":1,"./parser-esnext":3}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -467,6 +489,26 @@ var Parser = (function () {
 			return args;
 		}
 	}, {
+		key: 'parseConditionalExpression',
+		value: function parseConditionalExpression(test) {
+			this.read();
+			this.moveon();
+
+			var consequent = this.parseExpression();
+
+			this.read();
+			this.moveon();
+
+			var alternate = this.parseExpression();
+
+			return {
+				type: 'Conditional',
+				test: test,
+				consequent: consequent,
+				alternate: alternate
+			};
+		}
+	}, {
 		key: 'parseIdentifier',
 		value: function parseIdentifier() {
 			var value = this.current;
@@ -516,7 +558,7 @@ var Parser = (function () {
 			this.read();
 			this.moveon();
 
-			var property = this.parseExpression();
+			var property = this.parseToken();
 
 			if (computed) {
 				this.read();
@@ -585,7 +627,8 @@ var Parser = (function () {
 
 			return {
 				type: 'Number',
-				value: parseFloat(value)
+				value: parseFloat(value),
+				raw: value
 			};
 		}
 	}, {
@@ -595,19 +638,24 @@ var Parser = (function () {
 		key: 'parseString',
 		value: function parseString() {
 			var value = '',
-			    qoute = this.current;
+			    raw = this.current,
+			    qoute = raw;
 
 			while (this.read()) {
+
+				raw += this.current;
 
 				// Escaped qoutes
 				if (this.current === '\\' && this.peek() === qoute) {
 					value += qoute;
+					raw += qoute;
 					this.skip(1);
 					continue;
 				}
 
 				if (this.current === qoute) {
 					this.read();
+					// raw += this.current;
 					break;
 				}
 
@@ -622,7 +670,8 @@ var Parser = (function () {
 
 			return {
 				type: 'String',
-				value: value
+				value: value,
+				raw: raw
 			};
 		}
 	}, {

@@ -255,6 +255,24 @@ class Parser {
 
 		return args;
 	}
+	parseConditionalExpression (test) {
+		this.read();
+		this.moveon();
+
+		let consequent = this.parseExpression();
+
+		this.read();
+		this.moveon();
+
+		let alternate = this.parseExpression();
+
+		return {
+			type: 'Conditional',
+			test: test,
+			consequent: consequent,
+			alternate: alternate
+		};
+	}
 	parseIdentifier () {
 		var value = this.current;
 
@@ -300,7 +318,7 @@ class Parser {
 		this.read();
 		this.moveon();
 
-		let property = this.parseExpression();
+		let property = this.parseToken();
 
 		if( computed ) {
 			this.read();
@@ -366,18 +384,24 @@ class Parser {
 
 		return {
 			type: 'Number',
-			value: parseFloat(value)
+			value: parseFloat(value),
+			raw: value
 		};
 	}
 	parseObject () {}
 	parseString () {
 		var value = '',
-			qoute = this.current;
+			raw = this.current,
+			qoute = raw;
 
 		while ( this.read() ) {
 
+			raw += this.current;
+
 			// Escaped qoutes
-			if( this.current === '\\' && this.peek() === qoute ) {				value += qoute;
+			if( this.current === '\\' && this.peek() === qoute ) {
+				value += qoute;
+				raw += qoute;
 				this.skip(1);
 				continue;
 			}
@@ -398,7 +422,8 @@ class Parser {
 
 		return {
 			type: 'String',
-			value: value
+			value: value,
+			raw: raw
 		};
 	}
 	parseUnaryExpression () {

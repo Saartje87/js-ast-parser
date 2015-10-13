@@ -1,4 +1,5 @@
-// Identifier should have name attribute!
+// TODO Identifier should have name attribute!
+// TODO Function chaining
 describe('Parser', function () {
 
 	var parse = Rocky.parse;
@@ -7,17 +8,20 @@ describe('Parser', function () {
 
 		expect(parse('1')).toEqual({
 			type: 'Number',
-			value: 1
+			value: 1,
+			raw: '1'
 		});
 
 		expect(parse('1.234')).toEqual({
 			type: 'Number',
-			value: 1.234
+			value: 1.234,
+			raw: '1.234'
 		});
 
 		expect(parse('1e3')).toEqual({
 			type: 'Number',
-			value: 1000 // or 1e3..
+			value: 1000,
+			raw: '1e3'
 		});
 	});
 
@@ -25,42 +29,50 @@ describe('Parser', function () {
 
 		expect(parse('"foo"')).toEqual({
 			type: 'String',
-			value: 'foo'
+			value: 'foo',
+			raw: '"foo"'
 		});
 
 		expect(parse('"foo bar"')).toEqual({
 			type: 'String',
-			value: 'foo bar'
+			value: 'foo bar',
+			raw: '"foo bar"'
 		});
 
 		expect(parse('"foo \\"bar\\""')).toEqual({
 			type: 'String',
-			value: 'foo "bar"'
+			value: 'foo "bar"',
+			raw: '"foo \\"bar\\""'
 		});
 
 		expect(parse("'foo'")).toEqual({
 			type: 'String',
-			value: 'foo'
+			value: 'foo',
+			raw: "'foo'"
 		});
 
 		expect(parse("'foo bar'")).toEqual({
 			type: 'String',
-			value: 'foo bar'
+			value: 'foo bar',
+			raw: "'foo bar'"
 		});
 
 		expect(parse("'foo \\'bar\\''")).toEqual({
 			type: 'String',
-			value: "foo 'bar'"
+			value: "foo 'bar'",
+			raw: "'foo \\'bar\\''"
 		});
 
 		expect(parse("'foo \"bar\\'s\"'")).toEqual({
 			type: 'String',
-			value: 'foo "bar\'s"'
+			value: 'foo "bar\'s"',
+			raw: "'foo \"bar\\'s\"'"
 		});
 
 		expect(parse('"foo\n\t"')).toEqual({
 			type: 'String',
-			value: 'foo\n\t'
+			value: 'foo\n\t',
+			raw: '"foo\n\t"'
 		});
 	});
 
@@ -102,11 +114,13 @@ describe('Parser', function () {
 			args: [
 				{
 					type: 'Number',
-					value: 1
+					value: 1,
+					raw: '1'
 				},
 				{
 					type: 'String',
-					value: '2'
+					value: '2',
+					raw: '"2"'
 				}
 			]
 		});
@@ -127,13 +141,15 @@ describe('Parser', function () {
 					args: [
 						{
 							type: 'String',
-							value: 'baz'
+							value: 'baz',
+							raw: '"baz"'
 						}
 					]
 				},
 				{
 					type: 'Number',
-					value: 2
+					value: 2,
+					raw: '2'
 				}
 			]
 		});
@@ -146,11 +162,13 @@ describe('Parser', function () {
 			operator: '+',
 			left: {
 				type: 'Number',
-				value: 1
+				value: 1,
+				raw: '1'
 			},
 			right: {
 				type: 'Number',
-				value: 2
+				value: 2,
+				raw: '2'
 			}
 		});
 
@@ -159,11 +177,13 @@ describe('Parser', function () {
 			operator: '-',
 			left: {
 				type: 'Number',
-				value: 24
+				value: 24,
+				raw: '24'
 			},
 			right: {
 				type: 'Number',
-				value: 12
+				value: 12,
+				raw: '12'
 			}
 		});
 
@@ -175,11 +195,13 @@ describe('Parser', function () {
 				operator: '*',
 				left: {
 					type: 'Number',
-					value: 2
+					value: 2,
+					raw: '2'
 				},
 				right: {
 					type: 'Number',
-					value: 5
+					value: 5,
+					raw: '5'
 				}
 			},
 			right: {
@@ -187,11 +209,13 @@ describe('Parser', function () {
 				operator: '/',
 				left: {
 					type: 'Number',
-					value: 2
+					value: 2,
+					raw: '2'
 				},
 				right: {
 					type: 'Number',
-					value: 4
+					value: 4,
+					raw: '4'
 				}
 			}
 		});
@@ -222,11 +246,13 @@ describe('Parser', function () {
 				operator: '+',
 				left: {
 					type: 'Number',
-					value: 1
+					value: 1,
+					raw: '1'
 				},
 				right: {
 					type: 'Number',
-					value: 3
+					value: 3,
+					raw: '3'
 				}
 			}
 		});
@@ -334,7 +360,8 @@ describe('Parser', function () {
 			},
 			property: {
 				type: 'Number',
-				value: 0
+				value: 0,
+				raw: '0'
 			}
 		});
 
@@ -352,6 +379,38 @@ describe('Parser', function () {
 					value: 'bar'
 				},
 				args: []
+			}
+		});
+	});
+
+	it('should parse Logical expressions', function () {
+
+		expect(parse('foo.bar || bar.foo')).toEqual({
+			type: 'Logical',
+			operator: '||',
+			left: {
+				type: "Member",
+				computed: false,
+				object: {
+					type: "Identifier",
+					value: "foo"
+				},
+				property: {
+					type: "Identifier",
+					value: "bar"
+				}
+			},
+			right: {
+				type: "Member",
+				computed: false,
+				object: {
+					type: "Identifier",
+					value: "bar"
+				},
+				property: {
+					type: "Identifier",
+					value: "foo"
+				}
 			}
 		});
 	});
