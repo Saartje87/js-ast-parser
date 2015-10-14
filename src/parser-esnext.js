@@ -158,7 +158,7 @@ class Parser {
 		this.moveon();
 
 		/* jshint boss: true */
-		while( node = this.parseToken() ) {
+		while( node = this.parseExpression() ) {
 
 			properties.push(node);
 
@@ -592,7 +592,7 @@ class Parser {
 const parser = new Parser();
 
 function parse (expression) {
-	
+
 	return parser.parse(expression.trim());
 }
 

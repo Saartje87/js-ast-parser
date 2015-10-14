@@ -383,7 +383,7 @@ var Parser = (function () {
 			this.moveon();
 
 			/* jshint boss: true */
-			while (node = this.parseToken()) {
+			while (node = this.parseExpression()) {
 
 				properties.push(node);
 

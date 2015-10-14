@@ -531,5 +531,29 @@ describe('Parser', function () {
 				}
 			]
 		});
+
+		expect(parse('[a, 1 + 2]')).toEqual({
+			type: "Array",
+			properties: [
+				{
+					type: "Identifier",
+					value: "a"
+				},
+				{
+					type: "Binary",
+					operator: "+",
+					left: {
+						type: "Number",
+						value: 1,
+						raw: "1"
+					},
+					right: {
+						type: "Number",
+						value: 2,
+						raw: "2"
+					}
+				}
+			]
+		});
 	});
 });
