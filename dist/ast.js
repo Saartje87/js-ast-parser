@@ -21,10 +21,12 @@ var Compiler = (function () {
 		value: function compile(node) {
 
 			// console.log('compile()', node);
+			var context = this.precompile(node);
 
 			return {
-				callable: this.precompile(node),
-				bindingPaths: this.findBindings(node)
+				/* jshint evil:true */
+				callable: new Function('context', context.code),
+				bindingPaths: context.bindings
 			};
 		}
 	}, {
@@ -42,9 +44,7 @@ var Compiler = (function () {
 			console.log(context.code);
 			console.log(context.bindings);
 
-			/* jshint evil:true */
-			// return context.code;
-			return new Function('context', context.code);
+			return context;
 		}
 	}, {
 		key: 'walk',
@@ -70,12 +70,16 @@ var Compiler = (function () {
 
 			var argsLength = node.args.length - 1;
 			this.walk(node.callable, context);
+
+			var _members = this.members;
+			this.members = null;
 			context.code += '(';
 			node.args.forEach(function (node, i) {
 				_this.walk(node, context);
 				context.code += argsLength !== i ? ',' : '';
 			});
 			context.code += ')';
+			this.members = _members;
 		}
 	}, {
 		key: 'Conditional',
@@ -113,6 +117,10 @@ var Compiler = (function () {
 	}, {
 		key: 'Identifier',
 		value: function Identifier(node, context) {
+			if (!this.members) {
+				context.code += 'context.';
+			}
+
 			context.code += node.value;
 
 			if (!this.members) {
@@ -140,7 +148,10 @@ var Compiler = (function () {
 			this.walk(node.object, context);
 			if (node.computed) {
 				context.code += '[';
+				var _members = this.members;
+				this.members = null;
 				this.walk(node.property, context);
+				this.members = _members;
 				context.code += ']';
 			} else {
 				context.code += '.';
@@ -152,25 +163,14 @@ var Compiler = (function () {
 				this.members = null;
 			}
 		}
-	}, {
-		key: 'flush',
-		value: function flush() {
-			var buffer = this.buffer;
-
-			this.buffer = '';
-
-			return buffer;
-		}
-	}, {
-		key: 'findBindings',
-		value: function findBindings() {}
 	}]);
 
 	return Compiler;
 })();
 
+var compiler = new Compiler();
+
 function compile(node) {
-	var compiler = new Compiler();
 
 	return compiler.compile(node);
 }
@@ -330,6 +330,14 @@ var Parser = (function () {
 				return this.parseUnaryExpression();
 			}
 
+			if (this.is('[')) {
+				return this.parseArray();
+			}
+
+			if (this.is('{')) {
+				return this.parseObject();
+			}
+
 			if (this.isIdentifierStart()) {
 				return this.parseVariable();
 			}
@@ -367,7 +375,40 @@ var Parser = (function () {
    */
 	}, {
 		key: 'parseArray',
-		value: function parseArray() {}
+		value: function parseArray() {
+			var properties = [];
+			var node;
+
+			this.read();
+			this.moveon();
+
+			/* jshint boss: true */
+			while (node = this.parseToken()) {
+
+				properties.push(node);
+
+				if (this.is(',')) {
+					this.read();
+					this.moveon();
+				}
+				// End of callable args
+				else if (this.is(']')) {
+						break;
+					}
+			}
+
+			if (!this.is(']')) {
+				throw new ParseError('Unexpected callable end');
+			}
+
+			this.read();
+			this.moveon();
+
+			return {
+				type: 'Array',
+				properties: properties
+			};
+		}
 	}, {
 		key: 'parseAssignmentExpression',
 		value: function parseAssignmentExpression(left) {
@@ -465,7 +506,7 @@ var Parser = (function () {
 			    node;
 
 			/* jshint boss: true */
-			while (node = this.parseToken()) {
+			while (node = this.parseExpression()) {
 
 				args.push(node);
 
@@ -562,6 +603,7 @@ var Parser = (function () {
 
 			if (computed) {
 				this.read();
+				this.moveon();
 			}
 
 			return {
@@ -633,7 +675,62 @@ var Parser = (function () {
 		}
 	}, {
 		key: 'parseObject',
-		value: function parseObject() {}
+		value: function parseObject() {
+			var properties = [];
+			var node;
+
+			this.read();
+			this.moveon();
+
+			// console.log(this.current);
+
+			/* jshint boss: true */
+			while (node = this.parseObjectProperty()) {
+
+				properties.push(node);
+
+				if (this.is(',')) {
+					this.read();
+					this.moveon();
+				}
+				// End of callable args
+				else if (this.is('}')) {
+						break;
+					}
+			}
+
+			if (!this.is('}')) {
+				throw new ParseError('Unexpected callable end');
+			}
+
+			this.read();
+			this.moveon();
+
+			return {
+				type: 'Object',
+				properties: properties
+			};
+		}
+	}, {
+		key: 'parseObjectProperty',
+		value: function parseObjectProperty() {
+			var key = this.parseToken();
+
+			if (!this.is(':')) {
+				throw new ParseError();
+			}
+
+			this.read();
+			this.moveon();
+
+			var value = this.parseExpression();
+
+			return {
+				type: 'Property',
+				key: key,
+				value: value
+			};
+		}
 	}, {
 		key: 'parseString',
 		value: function parseString() {
@@ -655,7 +752,6 @@ var Parser = (function () {
 
 				if (this.current === qoute) {
 					this.read();
-					// raw += this.current;
 					break;
 				}
 
@@ -753,8 +849,9 @@ var Parser = (function () {
 	return Parser;
 })();
 
+var parser = new Parser();
+
 function parse(expression) {
-	var parser = new Parser(); // Could be outside created (singleton)
 
 	return parser.parse(expression.trim());
 }

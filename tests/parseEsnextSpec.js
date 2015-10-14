@@ -1,5 +1,6 @@
-// TODO Identifier should have name attribute!
+// TODO Identifier should have name attribute?
 // TODO Function chaining
+
 describe('Parser', function () {
 
 	var parse = Rocky.parse;
@@ -150,6 +151,30 @@ describe('Parser', function () {
 					type: 'Number',
 					value: 2,
 					raw: '2'
+				}
+			]
+		});
+
+		expect(parse('foo(2 + 2)')).toEqual({
+			type: 'Callable',
+			callable: {
+				type: 'Identifier',
+				value: 'foo'
+			},
+			args: [
+				{
+					type: 'Binary',
+					operator: '+',
+					left: {
+						type: 'Number',
+						value: 2,
+						raw: '2'
+					},
+					right: {
+						type: 'Number',
+						value: 2,
+						raw: '2'
+					}
 				}
 			]
 		});
@@ -412,6 +437,99 @@ describe('Parser', function () {
 					value: "foo"
 				}
 			}
+		});
+	});
+
+	it('should parse objects', function () {
+
+		expect(parse('{foo: "bar"}')).toEqual({
+			type: "Object",
+			properties: [
+				{
+					type: "Property",
+					key: {
+						type: "Identifier",
+						value: "foo"
+					},
+					value: {
+						type: "String",
+						value: "bar",
+						raw: "\"bar\""
+					}
+				}
+			]
+		});
+
+		expect(parse('{foo: "bar", bar: 2 + 2}')).toEqual({
+			type: "Object",
+			properties: [
+				{
+					type: "Property",
+					key: {
+						type: "Identifier",
+						value: "foo"
+					},
+					value: {
+						type: "String",
+						value: "bar",
+						raw: "\"bar\""
+					}
+				},
+				{
+					type: "Property",
+					key: {
+						type: "Identifier",
+						value: "bar"
+					},
+					value: {
+						type: "Binary",
+						operator: "+",
+						left: {
+							type: "Number",
+							value: 2,
+							raw: "2"
+						},
+						right: {
+							type: "Number",
+							value: 2,
+							raw: "2"
+						}
+					}
+				}
+			]
+		});
+	});
+
+	it('should parse arrays', function () {
+
+		expect(parse('[1]')).toEqual({
+			type: "Array",
+			properties: [
+				{
+					type: "Number",
+					value: 1,
+					raw: "1"
+				}
+			]
+		});
+
+		expect(parse('[1, foo()]')).toEqual({
+			type: "Array",
+			properties: [
+				{
+					type: "Number",
+					value: 1,
+					raw: "1"
+				},
+				{
+					type: "Callable",
+					callable: {
+						type: "Identifier",
+						value: "foo"
+					},
+					args: []
+				}
+			]
 		});
 	});
 });

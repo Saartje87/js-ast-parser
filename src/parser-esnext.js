@@ -110,6 +110,14 @@ class Parser {
 			return this.parseUnaryExpression();
 		}
 
+		if( this.is('[') ) {
+			return this.parseArray();
+		}
+
+		if( this.is('{') ) {
+			return this.parseObject();
+		}
+
 		if( this.isIdentifierStart() ) {
 			return this.parseVariable();
 		}
@@ -142,7 +150,40 @@ class Parser {
 	/**
 	 *
 	 */
-	parseArray () {}
+	parseArray () {
+		var properties = [];
+		var node;
+
+		this.read();
+		this.moveon();
+
+		/* jshint boss: true */
+		while( node = this.parseToken() ) {
+
+			properties.push(node);
+
+			if( this.is(',') ) {
+				this.read();
+				this.moveon();
+			}
+			// End of callable args
+			else if( this.is(']') ) {
+				break;
+			}
+		}
+
+		if( !this.is(']') ) {
+			throw new ParseError('Unexpected callable end');
+		}
+
+		this.read();
+		this.moveon();
+
+		return {
+			type: 'Array',
+			properties: properties
+		};
+	}
 	parseAssignmentExpression ( left ) {
 
 		this.read();
@@ -232,7 +273,7 @@ class Parser {
 			node;
 
 		/* jshint boss: true */
-		while( node = this.parseToken() ) {
+		while( node = this.parseExpression() ) {
 
 			args.push(node);
 
@@ -322,6 +363,7 @@ class Parser {
 
 		if( computed ) {
 			this.read();
+			this.moveon();
 		}
 
 		return {
@@ -388,7 +430,60 @@ class Parser {
 			raw: value
 		};
 	}
-	parseObject () {}
+	parseObject () {
+		var properties = [];
+		var node;
+
+		this.read();
+		this.moveon();
+
+		// console.log(this.current);
+
+		/* jshint boss: true */
+		while( node = this.parseObjectProperty() ) {
+
+			properties.push(node);
+
+			if( this.is(',') ) {
+				this.read();
+				this.moveon();
+			}
+			// End of callable args
+			else if( this.is('}') ) {
+				break;
+			}
+		}
+
+		if( !this.is('}') ) {
+			throw new ParseError('Unexpected callable end');
+		}
+
+		this.read();
+		this.moveon();
+
+		return {
+			type: 'Object',
+			properties: properties
+		};
+	}
+	parseObjectProperty () {
+		let key = this.parseToken();
+
+		if( !this.is(':') ) {
+			throw new ParseError();
+		}
+
+		this.read();
+		this.moveon();
+
+		let value = this.parseExpression();
+
+		return {
+			type: 'Property',
+			key,
+			value
+		};
+	}
 	parseString () {
 		var value = '',
 			raw = this.current,
@@ -422,8 +517,8 @@ class Parser {
 
 		return {
 			type: 'String',
-			value: value,
-			raw: raw
+			value,
+			raw
 		};
 	}
 	parseUnaryExpression () {
@@ -494,9 +589,10 @@ class Parser {
 	}
 }
 
-function parse (expression) {
-	let parser = new Parser(); // Could be outside created (singleton)
+const parser = new Parser();
 
+function parse (expression) {
+	
 	return parser.parse(expression.trim());
 }
 
