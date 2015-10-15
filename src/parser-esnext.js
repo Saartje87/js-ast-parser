@@ -144,6 +144,10 @@ class Parser {
 			return this.parseAssignmentExpression(left);
 		}
 
+		if( this.is('.[') ) {
+			return this.parseMemberExpression(left);
+		}
+
 		return left;
 		// throw new ParseError('Errororrr '+this.current);
 	}
@@ -366,12 +370,18 @@ class Parser {
 			this.moveon();
 		}
 
-		return {
+		let node = {
 			type: 'Member',
 			computed: computed,
 			object: object,
 			property: property
 		};
+
+		if( this.is('.[') ) {
+			return this.parseMemberExpression(node);
+		}
+
+		return node;
 	}
 	parseOperator () {
 		var one = this.current,
@@ -436,8 +446,6 @@ class Parser {
 
 		this.read();
 		this.moveon();
-
-		// console.log(this.current);
 
 		/* jshint boss: true */
 		while( node = this.parseObjectProperty() ) {

@@ -390,6 +390,29 @@ describe('Parser', function () {
 			}
 		});
 
+		expect(parse('foo[0][0]')).toEqual({
+			type: 'Member',
+			computed: true,
+			object: {
+				type: 'Member',
+				computed: true,
+				object: {
+					type: 'Identifier',
+					value: 'foo'
+				},
+				property: {
+					type: 'Number',
+					value: 0,
+					raw: '0'
+				}
+			},
+			property: {
+				type: 'Number',
+				value: 0,
+				raw: '0'
+			}
+		});
+
 		expect(parse('foo[bar()]')).toEqual({
 			type: 'Member',
 			computed: true,

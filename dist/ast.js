@@ -26,7 +26,7 @@ var Compiler = (function () {
 			return {
 				/* jshint evil:true */
 				callable: new Function('context', context.code),
-				bindingPaths: context.bindings
+				bindings: context.bindings
 			};
 		}
 	}, {
@@ -57,6 +57,19 @@ var Compiler = (function () {
 			this[node.type](node, context);
 		}
 	}, {
+		key: 'Array',
+		value: function Array(node, context) {
+			var _this = this;
+
+			var argsLength = node.properties.length - 1;
+			context.code += '[';
+			node.properties.forEach(function (node, i) {
+				_this.walk(node, context);
+				context.code += argsLength !== i ? ',' : '';
+			});
+			context.code += ']';
+		}
+	}, {
 		key: 'Binary',
 		value: function Binary(node, context) {
 			this.walk(node.left, context);
@@ -66,7 +79,7 @@ var Compiler = (function () {
 	}, {
 		key: 'Callable',
 		value: function Callable(node, context) {
-			var _this = this;
+			var _this2 = this;
 
 			var argsLength = node.args.length - 1;
 			this.walk(node.callable, context);
@@ -75,7 +88,7 @@ var Compiler = (function () {
 			this.members = null;
 			context.code += '(';
 			node.args.forEach(function (node, i) {
-				_this.walk(node, context);
+				_this2.walk(node, context);
 				context.code += argsLength !== i ? ',' : '';
 			});
 			context.code += ')';
@@ -117,7 +130,7 @@ var Compiler = (function () {
 	}, {
 		key: 'Identifier',
 		value: function Identifier(node, context) {
-			if (!this.members) {
+			if (!this.members && node.value !== 'this') {
 				context.code += 'context.';
 			}
 
@@ -132,20 +145,40 @@ var Compiler = (function () {
 	}, {
 		key: 'Assignment',
 		value: function Assignment(node, context) {
+			context.code += 'context.set(\'';
+			this.members = [];
 			this.walk(node.left, context);
-			context.code += '=';
+			this.members = null;
+			context.code += '\', ';
 			this.walk(node.right, context);
+			context.code += ')';
 		}
 	}, {
 		key: 'Member',
 		value: function Member(node, context) {
 			var members = this.members;
+			// console.log('Number', this.members);
 			if (!members) {
-				// console.log('Go');
 				this.members = [];
-				context.code += 'context.';
+				if (node.object.type === 'Identifier') {
+					context.code += node.object.value !== 'this' ? 'context.' : '';
+				}
 			}
+			// if(!members) {
+			// 	this.members = [];
+			//
+			// 	if( node.object.value !== 'this' ) {
+			// 		context.code += node.computed ? 'context[': '';
+			// 		this.walk(node.object, context);
+			// 		context.code += node.computed ? ']': '';
+			// 	}
+			// } else {
+			// 	this.walk(node.object, context);
+			// }
+
+			// console.log(context.code);
 			this.walk(node.object, context);
+			// console.log(context.code);
 			if (node.computed) {
 				context.code += '[';
 				var _members = this.members;
@@ -154,14 +187,32 @@ var Compiler = (function () {
 				this.members = _members;
 				context.code += ']';
 			} else {
+				// console.log('--', node);
 				context.code += '.';
 				this.walk(node.property, context);
 			}
+			// console.log(context.code);
+
 			if (!members) {
 				// console.log('End');
+				// this.members.forEach((member) => {
+				//
+				// });
+				// console.log('Numb2er', this.members);
 				context.bindings.push(this.members.join('.'));
 				this.members = null;
 			}
+		}
+	}, {
+		key: 'Unary',
+		value: function Unary(node, context) {
+			context.code += node.operator;
+			this.walk(node.value, context);
+		}
+	}, {
+		key: 'Literal',
+		value: function Literal(node, context) {
+			context.code += String(node.value);
 		}
 	}]);
 
@@ -364,6 +415,10 @@ var Parser = (function () {
 
 			if (this.is('=')) {
 				return this.parseAssignmentExpression(left);
+			}
+
+			if (this.is('.[')) {
+				return this.parseMemberExpression(left);
 			}
 
 			return left;
@@ -606,12 +661,18 @@ var Parser = (function () {
 				this.moveon();
 			}
 
-			return {
+			var node = {
 				type: 'Member',
 				computed: computed,
 				object: object,
 				property: property
 			};
+
+			if (this.is('.[')) {
+				return this.parseMemberExpression(node);
+			}
+
+			return node;
 		}
 	}, {
 		key: 'parseOperator',
@@ -681,8 +742,6 @@ var Parser = (function () {
 
 			this.read();
 			this.moveon();
-
-			// console.log(this.current);
 
 			/* jshint boss: true */
 			while (node = this.parseObjectProperty()) {
